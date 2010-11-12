@@ -1,0 +1,14 @@
+RewriteEngine   on
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^(.*)$     index.php?page=$1 [QSA,L]
+
+<Files "update.php">
+	Order Allow,Deny
+# specialne kvoli labss2 aby wget mohol nacitat
+	Allow from labss2.fiit.stuba.sk
+# localhost by to malo tiez povolit
+	Allow from 127.0.0.1
+</Files>
+
+RewriteRule ^help/(.*\.php)$ help.php?h=$1 [QSA,L]

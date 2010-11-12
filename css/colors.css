@@ -1,0 +1,74 @@
+/* CSS Document */
+.color1{
+background-color: #2E4B73;
+}
+
+.color2{
+border: 1px solid #B0C4DE;
+background-color: #E6E6FA;
+}
+
+
+.color3{
+border: 1px solid #ADD8E6;
+background-color: #B0C4DE;
+}
+
+.color4{
+border: 1px solid white;
+background-color: #ADD8E6;
+}
+
+.color5{
+background-color: rgb(200,200,200);
+}
+
+.color6{
+background-color: rgb(255,230,190);
+}
+
+/* switch bleda farba */
+.active{
+background-color: #2E4B73;
+color: white;
+}
+
+.formBackground{
+background-color: white;
+}
+
+/* switch tmava farba */
+.passive{
+background-color: #E6E6FA;
+}
+
+.color_a{
+background-color: 	#32CD32;
+}
+
+.color_b{
+background-color: #E6E6FA;
+}
+
+.color_c{
+background-color: red;
+}
+
+.priorityTableHead{
+background-color: #B0C4DE;
+}
+
+.priorityTableContent{
+background-color: #E6E6FA;
+}
+
+.priorityTableLine{
+background-color: #B0C4DE;
+min-height: 3px;
+}
+
+.priorityTable{
+border: none;
+}
+
+

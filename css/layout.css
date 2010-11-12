@@ -1,0 +1,119 @@
+/* CSS Document */
+@charset "iso-8859-2";
+
+#tab1, #tab2, #tab3{
+width: 120px;
+height: 30px;
+float: left;
+text-align: left;
+font-size: 13px;
+margin-right: 2px;
+display: none;
+padding-top: 3px;
+}
+
+#heading1a, #heading2a, #heading3a, #heading1b, #heading2b, #heading3b, #heading1c, #heading2c, #heading3c{
+width: 400px;
+height: 15px;
+text-align: left;
+font-size: 15;
+margin-top: 10px;
+margin-left: 10px;
+float: left;
+color: white;
+display: none;
+font-weight: bold;
+}
+
+.h_group{
+width: 580px;
+height: 15px;
+text-align: left;
+font-size: 15;
+margin-top: 5px;
+margin-bottom: 5px;
+margin-left: 10px;
+float: left;
+color: #2E4B73;
+display: none;
+font-weight: bold;
+font-style: italic;
+}
+
+.add_rem_group_button{
+text-align: right;
+}
+
+#handling{
+width: 600px;
+}
+
+.control{
+width: 60px;
+height: 30px;
+text-align: center;
+padding-top: 5px;
+float: right;
+font-size: 13;
+margin-left: 2px;
+}
+
+.part{
+width: 600px;
+float: left;
+padding-top: 5px;
+text-align: center;
+font-size: 13;
+display: none;
+}
+
+#mainForm{
+width: 100%;
+}
+
+#requirements{
+border-bottom:none;
+}
+
+#tabs{
+width: 100%;
+height: 30px;
+}
+
+#title1{
+width: 100%;
+padding-top: 10px;
+padding-bottom: 10px;
+text-align: left;
+font-size: 16;
+}
+
+#title2{
+width: 100%;
+padding-top: 10px;
+padding-bottom: 10px;
+text-align: left;
+font-size: 13;
+}
+
+#header{
+width: 600px;
+height: 60px;
+}
+
+.icon{
+width: 15px;
+height: 12px;
+float: left;
+text-align: right;
+}
+
+.heading{
+width: 90px;
+height: 25px;
+margin-left: 10px;
+padding-top: 2px;
+float: left;
+font-style: italic;
+font-weight: bold;
+}

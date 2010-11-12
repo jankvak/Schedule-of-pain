@@ -1,0 +1,1 @@
+INSERT INTO menu(name, href, group_id) VALUES ('Správa semestrov', 'ape/periods/index', 6);

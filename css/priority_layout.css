@@ -1,0 +1,63 @@
+/* CSS Document */
+@charset "iso-8859-2";
+
+.table{
+width: 672px;
+height: 192px;
+float: left;
+text-align: center;
+font-family: "Georgia";
+font-size: 12px;
+display: none;
+}
+
+#chooser{
+width: 672px;
+height: 33px;
+float: left;
+text-align: center;
+font-family: "Georgia";
+font-size: 12px;
+}
+
+.col{
+width: 40px;
+height: 30px; 
+margin: 1px;
+float: left;
+line-height: 200%;
+}
+
+.col_top{
+width: 40px;
+height: 30px; 
+margin: 1px;
+float: left;
+}
+
+.sel{
+border: 1px solid #2E4B73;
+/*border-top: 3px solid black;
+border-bottom: 3px solid black;*/
+padding-top: 2px;
+font-weight: bold;
+width: 34px;
+height: 26px; 
+margin: 1px;
+float: left;
+}
+
+.priorityTableNote{
+height: 27px;
+padding-top: 3px;
+}
+
+.commentNote{
+height: 70px;
+text-align:center;
+padding-bottom:5px;
+padding-top:5px;
+margin: 1px;
+float: left;
+line-height: 200%;
+}
