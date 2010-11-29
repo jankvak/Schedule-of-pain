@@ -44,7 +44,7 @@ class Rooms extends Model {
     function getAll($orderByName = false) {
         $order = $orderByName? "ORDER BY r.name": "ORDER BY r.capacity, room_type";
         $query =
-            "SELECT r.id, r.name AS nazov, r.capacity AS kapacita, r.note AS poznamka, r.room_type AS typ
+            "SELECT r.id, r.name AS nazov, r.capacity AS kapacita, r.note AS poznamka, r.room_type AS typ, r.room_type AS typ_id
                FROM room r
                {$order}";
                
@@ -55,7 +55,7 @@ class Rooms extends Model {
     // vrati informacie o danej miestnosti
     function get($id) {
         $query =
-            "SELECT r.id, r.name AS nazov, r.capacity AS kapacita, r.note AS poznamka, r.room_type AS id_miestnost_typ
+            "SELECT r.id, r.name AS nazov, r.capacity AS kapacita, r.note AS poznamka, r.room_type AS id_miestnost_typ, r.room_type AS typ_id
              FROM room r
              WHERE r.id = $1";
         $this->dbh->query($query, array($id));
@@ -100,6 +100,7 @@ class Rooms extends Model {
             $query =
                 "INSERT INTO room_equipment (id_room,id_equipment)
             	 VALUES ($1, $2)";
+            //throw new Exception($eq);
             $this->dbh->query($query, array($this->id, $eq));
         }
         $this->dbh->TransactionEnd();

@@ -80,7 +80,7 @@ class Periods extends Model
     public function getShortAll()
     {
         $sql =
-            "SELECT id, year, semester_order
+            "SELECT id, year AS rok, semester_order AS semester
 			 FROM semester
 			 ORDER BY year DESC, semester_order DESC";
         $this->dbh->Query($sql);
@@ -95,7 +95,7 @@ class Periods extends Model
     public function load($semesterID)
     {
         $sql =
-            "SELECT id, year, semester_order, ";
+            "SELECT id, year AS rok, semester_order AS semester, ";
         $sql .= DateConvert::DBtoSK("tuition_start")." AS zac_uc,";
         $sql .= DateConvert::DBtoSK("tuition_end")." AS kon_uc,";
         $sql .= DateConvert::DBtoSK("exam_start")." AS zac_skus,";
@@ -153,7 +153,7 @@ class Periods extends Model
     public function semesterExistuje()
     {
         $sql =
-            "SELECT year, semester_order
+            "SELECT year AS rok, semester_order AS semester
 			 FROM semester
 			 WHERE semester_order=$1 AND year=$2";
         $params = array($this->semester, $this->rok);
@@ -189,7 +189,7 @@ class Periods extends Model
     public function getPrevSemester($semesterID)
     {
     // ziska udaje o dabin semestri aby vedel ziskat predosly
-        $sql = "SELECT year, semester_order FROM semester WHERE id=$1";
+        $sql = "SELECT year AS rok, semester_order AS semester FROM semester WHERE id=$1";
         $this->dbh->query($sql, array($semesterID));
         $prev_semester = $this->dbh->fetch_assoc();
         $prev_semester["year"] -= 1;
@@ -213,7 +213,7 @@ class Periods extends Model
     public function getPrevYearSemesters($semesterID)
     {
     // ziska udaje o dabin semestri aby vedel ziskat predosly
-        $sql = "SELECT year FROM semester WHERE id=$1";
+        $sql = "SELECT year AS rok FROM semester WHERE id=$1";
         $this->dbh->query($sql, array($semesterID));
         $prev_semester = $this->dbh->fetch_assoc();
         $prev_semester["year"] -= 1;

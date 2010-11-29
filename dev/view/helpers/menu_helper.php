@@ -20,14 +20,14 @@ class MenuHelper extends Helper {
 ";
 		foreach ($semestre as $semester)
 		{
-			switch ($semester["semester_order"])
+			switch ($semester["semester"])
 			{
 				case 1: $skratka = "ZS"; break;
 				case 2: $skratka = "LS"; break;
 				default: $skratka = "ERR ?";
 			}
 			$id = $semester["id"];
-			$rok[1] = $semester["year"];
+			$rok[1] = $semester["rok"];
 			$rok[2] = $rok[1]+1;
 			$nazov = "{$skratka} - {$rok[1]}/{$rok[2]}";
 			$sel = ($selectedSem == $id) ? " selected=\"selected\"" : "";
