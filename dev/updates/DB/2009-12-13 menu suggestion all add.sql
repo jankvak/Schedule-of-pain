@@ -1,0 +1,1 @@
+INSERT INTO menu(name, href, group_id) VALUES ('Prezerať pripomienky k systému', 'all/suggestion/index', 0);

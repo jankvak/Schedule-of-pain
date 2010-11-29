@@ -1,0 +1,1 @@
+ALTER TABLE log ALTER COLUMN udalost TYPE text;

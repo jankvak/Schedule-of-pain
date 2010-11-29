@@ -1,0 +1,139 @@
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, font, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+caption, tbody, tfoot, thead {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    outline: 0;
+    font-size: 100%;
+    vertical-align:top;
+    background: transparent;
+}
+
+body {
+    line-height: 1;
+    font-family: Trebuchet MS,Verdana,Arial,sans-serif;
+    font-size: 16px;
+}
+
+img{
+
+}
+
+blockquote, q {
+    quotes: none;
+}
+
+blockquote:before, blockquote:after,
+q:before, q:after {
+    content: '';
+    content: none;
+}
+
+#content {
+    min-height: 390px;
+    padding: 10px;
+    width: 75%;
+    float:left;
+}
+
+#content a {
+    color: #2E4B73;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+#content a:hover {
+    color: #69cfec;
+}
+
+#line {
+    height: 100%;
+    border-right: 3px solid #008FBB;
+}
+ol, ul {
+    list-style-position:inside;
+}
+
+.ul {
+    list-style:none;
+}
+
+#text{
+    font-size:120%;
+}
+
+#title h3 {
+    margin-top: 0.3em;
+}
+
+#title h4 {
+    color: #008fbb;
+}
+
+#title {
+    background: url('logo.png') no-repeat;
+    padding-left: 12%;
+    padding-top: 5px;
+    height: 90px;
+    width: 88%;
+    float:left;
+    border-bottom: 3px solid #008FBB;
+}
+
+#title a {
+    font-size: 170%;
+    text-decoration: none;
+    color: black;
+}
+
+#title #logo{
+    background: url("../sources/okno.png") no-repeat;
+    background-position:right 20;
+    float:right;
+    width: 256px;
+    height: 256px;
+    margin-top: -60px; /* posunie do title*/
+}
+
+h2 {
+    font-size:140%;
+    font-style:italic;
+    color:#008FBB;
+}
+
+#obrazok {
+    font-family: Arial;
+    font-size:10;
+}
+
+#footer{
+    text-align: center;
+    font-size: 90%;
+    border-top: 3px solid #008FBB;
+    padding-top: 1em;
+    width:100%;
+    clear:both;
+    background-color: white;}
+img {
+
+    /* This centers the image */
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    /* This adds the border */
+    padding:8px;
+    border:solid;
+    border-color: #dddddd #aaaaaa #aaaaaa #dddddd;
+    border-width: 1px 2px 2px 1px;
+    background-color:#2E4B73;
+}
+h4 {
+    color: #008fbb;
+}
