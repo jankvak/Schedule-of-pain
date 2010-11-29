@@ -34,13 +34,14 @@ class Session {
 	 */
 	public function writeUser($user) {
 		// vlozi data noveho usera
+		FB::error($user);
 		$this->write('uid', $user['id']);
-		$this->write('name', $user['meno']); // to je uz vyskladane z DB
-		$this->write('mail', $user["mail"]);
+		$this->write('name', $user['name']); // to je uz vyskladane z DB
+		$this->write('mail', $user["email"]);
 		$this->write('username', $user['login']);
 		$this->write('groups', $user['groups']);
 		$this->write('semester', $user['semester']);
-                if ($user['posielat_moje_zmeny']=='t')
+                if ($user['notification_on']=='t')
                     $this->write('notifyMyActions', TRUE);
                 else
                     $this->write('notifyMyActions', FALSE);

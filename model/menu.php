@@ -18,12 +18,12 @@ class Menu extends Model {
              * 4. finalne vyfiltruje len tie pre ktore mame pristup alebo pristup je all
              * */
             $query =
-                "SELECT s.nazov, m.name, m.href, m.poradie " .
+                "SELECT g.name AS nazov, m.name , m.href, m.order " .
                 "FROM menu m " .
-                "JOIN skupina s ON s.id = m.group_id " .
-                "LEFT JOIN clenstvo c ON (c.id_skupina = s.id AND c.id_pedagog = $1) " .
-                "WHERE c.id IS NOT NULL OR m.group_id=0 " .
-                "ORDER BY m.poradie";
+                "JOIN groups g ON g.id = m.id_group " .
+                "LEFT JOIN person_group pg ON (pg.id_group = g.id AND pg.id_person = $1) " .
+                 "WHERE pg.id IS NOT NULL OR m.id_group=0 ".
+                "ORDER BY m.order";
             $this->dbh->query($query, array($userid));
 
             return $this->dbh->fetchall_assoc();

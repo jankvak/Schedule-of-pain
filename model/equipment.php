@@ -30,7 +30,7 @@ class Equipment extends Model {
 
     // vrati vsetko vybavenie
     function getAll() {
-        $query = "SELECT id, typ, poznamka, prenosne FROM vybavenie;";
+        $query = "SELECT id, type AS typ, note AS poznamka, portable AS prenosne FROM equipment;";
         $this->dbh->Query($query);
         return $this->dbh->fetchall_assoc();
     }
@@ -38,7 +38,7 @@ class Equipment extends Model {
     // update existujuceho vybavenia
     function update() {
         $this->prenosne = $this->prenosne ? 'true' : 'false';
-        $query = "UPDATE vybavenie SET typ=$1, poznamka=$2, prenosne=$3 WHERE id=$4";
+        $query = "UPDATE equipment SET type=$1, note=$2, portable=$3 WHERE id=$4";
         $this->dbh->query($query, array(
             $this->typ, $this->poznamka, $this->prenosne, $this->id
         ));
@@ -46,13 +46,13 @@ class Equipment extends Model {
 
     // vymaz vybavenie
     function delete($id) {
-        $query = "DELETE FROM vybavenie WHERE id=$1;";
+        $query = "DELETE FROM equipment WHERE id=$1;";
         $this->dbh->query($query, array($id));
     }
 
     // vrati vlastnosti vybavenia specifikovane jeho id v databaze
     function get($id) {
-        $query = "SELECT id, typ, poznamka, prenosne FROM vybavenie WHERE id=$1";
+        $query = "SELECT id, type AS typ, note AS poznamka, portable AS prenosne FROM equipment WHERE id=$1";
         $this->dbh->query($query, array($id));
         return $this->dbh->fetch_assoc();
     }
@@ -60,7 +60,7 @@ class Equipment extends Model {
     // uloz nove vybavenie
     function save() {
         $this->prenosne = $this->prenosne ? 'true' : 'false';
-        $query= "INSERT INTO vybavenie(typ, poznamka, prenosne) VALUES ($1, $2, $3)";
+        $query= "INSERT INTO equipment(type, note, portable) VALUES ($1, $2, $3)";
         $this->dbh->query($query, array(
             $this->typ, $this->poznamka, $this->prenosne
         ));
@@ -71,11 +71,11 @@ class Equipment extends Model {
     // ak edituje hlada ci iny neexistuje, nech nepadne editacia lebo typ ponechal
         if ($this->id)
         {
-            $query = "SELECT id FROM vybavenie WHERE typ=$1 AND id!=$2";
+            $query = "SELECT id FROM equipment WHERE type=$1 AND id!=$2";
             $params = array($this->typ, $this->id);
         }else
         {
-            $query = "SELECT id FROM vybavenie WHERE typ=$1";
+            $query = "SELECT id FROM equipment WHERE type=$1";
             $params = array($this->typ);
         }
         $this->dbh->query($query, $params);

@@ -2,12 +2,10 @@
 
 //database connection
 $config['DB_HOST'] = "localhost";
-$config['DB_USER'] = "team07issi";
-$config['DB_PASS'] = "kswnt53";
-$config['DB_NAME'] = "team07issi2010";
+$config['DB_USER'] = "postgres";
+$config['DB_PASS'] = "1Fa12uno";
+$config['DB_NAME'] = "Schedule2011";
 
-
-//zmenil som na false
 // use of LDAP
 $config['USE_LDAP'] = false;
 // accept only HTTPS login

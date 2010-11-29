@@ -64,7 +64,6 @@ class AuthController extends AppController {
             $this->redirect('auth/login');
             return;
         }
-
         $user = $this->user->findByLogin($username);
 
         if(empty($user)) {
@@ -79,7 +78,6 @@ class AuthController extends AppController {
         $periods = new Periods;
         $lastSemID = $periods->getLastSemesterID();
         $user["semester"] = $lastSemID;  
-
         $this->session->writeUser($user);
         $this->log("Prihlásenie používateľa");
         

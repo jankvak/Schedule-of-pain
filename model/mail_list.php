@@ -4,12 +4,13 @@ class MailList extends Model
     public function getListForCollection($semesterID)
     {
         $sql =
-            "SELECT DISTINCT p.mail
-             FROM pedagog p
-             LEFT JOIN vyucuje_predmet vp ON vp.id_pedagog=p.id
-             LEFT JOIN skupina s ON s.id=vp.id_pedagog_typ
-             LEFT JOIN predmet pr ON pr.id=vp.id_predmet
-             WHERE pr.id_semester=$1 AND s.code=$2";
+            "SELECT DISTINCT p.email
+             FROM person p
+             LEFT JOIN person_course pc ON pc.id_person=p.id
+             LEFT JOIN groups g ON g.id=pc.id_group
+             LEFT JOIN course c ON c.id=pc.id_course
+             LEFT JOIN course_semester cs ON cs.id_course=c.id
+             WHERE g.code=$2 AND cs.id_semester=$1";
         $this->dbh->query($sql, array($semesterID, "Garant"));
 
         return $this->dbh->fetchall_assoc();
@@ -19,18 +20,18 @@ class MailList extends Model
     public function getTeacherListForPredmet($predmetID, $role)
     {
         $sql =
-            "(SELECT DISTINCT p.mail
-             FROM vyucuje_predmet vp
-             LEFT JOIN pedagog p ON vp.id_pedagog=p.id
-             WHERE vp.id_predmet=$1 AND vp.id_pedagog_typ<= 
+            "(SELECT DISTINCT p.email
+             FROM person_course vp
+             LEFT JOIN person p ON vp.id_person=p.id
+             WHERE vp.id_course=$1 AND vp.id_group<= 
              (SELECT s.id 
-              FROM skupina s
+              FROM groups s
               WHERE s.code=$2))
              UNION
-             (SELECT DISTINCT p.mail
-             FROM pedagog p
-             LEFT JOIN clenstvo c ON c.id_pedagog=p.id
-             LEFT JOIN skupina s ON c.id_skupina=s.id
+             (SELECT DISTINCT p.email
+             FROM person p
+             LEFT JOIN person_group c ON c.id_person=p.id
+             LEFT JOIN groups s ON c.id_group=s.id
              WHERE s.code=$3)";
         $this->dbh->query($sql, array($predmetID, $role, "Scheduler"));
 
@@ -43,18 +44,18 @@ class MailList extends Model
     // t.j. ak napise dakto comments cviciaceho notifikuje
     // garanta, teachera aj cviciaceho
         $sql =
-            "(SELECT DISTINCT p.mail
-             FROM vyucuje_predmet vp
-             LEFT JOIN pedagog p ON vp.id_pedagog=p.id
-             WHERE vp.id_predmet=$1 AND vp.id_pedagog_typ<=
+            "(SELECT DISTINCT p.email
+             FROM person_course vp
+             LEFT JOIN person p ON vp.id_person=p.id
+             WHERE vp.id_course=$1 AND vp.id_group<=
              (SELECT s.id 
-              FROM skupina s
+              FROM groups s
               WHERE s.code=$2)) 
              UNION
-             (SELECT DISTINCT p.mail
-             FROM pedagog p
-             LEFT JOIN clenstvo c ON c.id_pedagog=p.id
-             LEFT JOIN skupina s ON c.id_skupina=s.id
+             (SELECT DISTINCT p.email
+             FROM person p
+             LEFT JOIN person_group c ON c.id_person=p.id
+             LEFT JOIN groups s ON c.id_group=s.id
              WHERE s.code=$3)";
         $this->dbh->query($sql, array($predmetID, $role, "Scheduler"));
 
@@ -68,9 +69,9 @@ class MailList extends Model
     {
         //vyberie vsetkych adminov systemu
         $sql =
-        "SELECT DISTINCT p.mail FROM pedagog p
-         LEFT JOIN clenstvo c ON p.id = c.id_pedagog
-         LEFT JOIN skupina s ON s.id = c.id_skupina
+        "SELECT DISTINCT p.email FROM person p
+         LEFT JOIN person_group c ON p.id = c.id_person
+         LEFT JOIN groups s ON s.id = c.id_group
          WHERE s.code = $1";
         $this->dbh->query($sql, 'Admin');
 
@@ -84,9 +85,9 @@ class MailList extends Model
     {
         //vyberie uzivatela podla jeho pripomienky
         $sql =
-        "SELECT p.mail FROM pedagog p
-            LEFT JOIN pripomienka pr ON p.id = pr.id_pedagog
-            WHERE pr.id = $1";
+        "SELECT p.email FROM person p
+            LEFT JOIN report r ON p.id = r.id_person
+            WHERE r.id = $1";
 
         $this->dbh->query($sql, $suggestionId);
         return $this->dbh->fetchall_assoc();

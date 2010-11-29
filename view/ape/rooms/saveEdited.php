@@ -1,4 +1,4 @@
-<h2>Editácia miestnosti</h2>
+﻿<h2>Editácia miestnosti</h2>
 <?php
   // nastavim premennu, ktora bude aktivna len pri formulari po chybe, treba mi to na checkboxy..
   $chyba = "ano";

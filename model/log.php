@@ -17,7 +17,7 @@ class Log extends Model
         $event = $this->dbh->SQLFix($event);
         $ip = $_SERVER["REMOTE_ADDR"];
         $sql =
-            "INSERT INTO log (username, zastupuje, udalost, cas, ip)
+            "INSERT INTO log (username, represent, event, timestamp, ip)
              VALUES ($1, $2, $3, now(), $4)";
         $this->dbh->query($sql, array(
             $username, $substitute, $event, $ip
@@ -53,8 +53,8 @@ class Log extends Model
         if (!is_int($limit)) throw new Exception("Limit is not a number");
          
         $sql =
-    		"SELECT id, ip, username, zastupuje, udalost, ".
-        DateConvert::DBTimestampToSkDateTime("cas")." AS cas
+    		"SELECT id, ip, username, represent, event, ".
+        DateConvert::DBTimestampToSkDateTime("timestamp")." AS cas
     		 FROM log 
     		 ORDER BY id DESC";
         if ($limit > 0) $sql.= " LIMIT {$limit}";

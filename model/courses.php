@@ -23,7 +23,7 @@ class Courses extends Model {
         // nemame predosle obdobie, nemame ani id predmetu
         if ($prevPeriodID == -1) return -1;
         $sql =
-            "SELECT id FROM predmet p
+            "SELECT id FROM course p
  			 WHERE p.id_semester=$1 AND p.nazov=$2";
         $this->dbh->query($sql, array($prevPeriodID, $predmetNazov));
         if ($this->dbh->RowCount() == 0) return -1;
@@ -78,11 +78,21 @@ class Courses extends Model {
     public function getForUser($userID, $semester, $role) {
     // extra stlpce berie kvoli gerantovi aby mal vsetky potrebne udaje pre rozhodnutie ci boli zadane poziadavky
         $query =
-            "SELECT p.id, p.nazov, p.skratka, p.pred_hod, p.cvic_hod, vp.id_pedagog_typ
-  			 FROM predmet p
-  			 JOIN vyucuje_predmet vp ON vp.id_predmet=p.id
- 			 WHERE  vp.id_pedagog=$1 AND p.id_semester=$2
-			 ORDER BY p.nazov";
+            "SELECT course.id,
+                    course.name AS nazov,
+                    course.abbreviation AS skratka,
+                    course.lecture_hours AS pred_hod,
+                    course.exercise_hours cvic_hod,
+                    p2c.id_group AS id_pedagog_typ
+             FROM   person_course p2c JOIN course ON p2c.id_course = course.id
+             WHERE  p2c.id_person=$1
+                AND EXISTS (
+                        SELECT 1
+                        FROM   course_semester c2s
+                        WHERE  c2s.id_course = course.id
+                           AND c2s.id_semester=$2)
+                AND p2c.id_group < 8
+             ORDER BY course.name";
         //vp.id_pedagog_typ=$1 AND
         $this->dbh->query($query, array($userID, $semester));
         $predmety = $this->dbh->fetchall_assoc();
@@ -109,10 +119,10 @@ class Courses extends Model {
     public function getAll($semesterID)
     {
         $sql =
-            "SELECT p.*
-			 FROM predmet p
-			 WHERE p.id_semester=$1
-			 ORDER BY p.nazov";
+            "SELECT course.*
+            FROM course JOIN course_semester c2s ON course.id = c2s.id_course
+            WHERE c2s.id_semester=$1
+	    ORDER BY course.name";
         $this->dbh->query($sql, array($semesterID));
 
         return $this->dbh->fetchall_assoc();
@@ -125,7 +135,7 @@ class Courses extends Model {
      */
     public function getCourseNameByID($courseID)
     {
-        $sql = "SELECT p.nazov FROM predmet p WHERE p.id = $1";
+        $sql = "SELECT course.nazov FROM course WHERE course.id = $1";
         $this->dbh->query($sql, $courseID);
         return $this->dbh->fetchall_assoc();
     }
@@ -138,10 +148,10 @@ class Courses extends Model {
     public function getAllShort($semesterID)
     {
         $sql =
-            "SELECT p.id, p.nazov
-			 FROM predmet p
-			 WHERE p.id_semester=$1
-			 ORDER BY p.nazov";
+            "SELECT course.id, course.name
+			 FROM course JOIN course_semester c2s ON course.id = c2s.id_course
+			 WHERE c2s.id_semester=$1
+			 ORDER BY course.name";
         $this->dbh->query($sql, array($semesterID));
 
         return $this->dbh->fetchall_assoc();
@@ -194,8 +204,16 @@ class Courses extends Model {
         $roleID = $this->__setRoleID($rola);
 
         $sql =
-            "SELECT vp.id FROM vyucuje_predmet vp
-             WHERE vp.id_predmet=$1 AND vp.id_pedagog=$2  AND (vp.id_pedagog_typ<=$3 AND vp.id_pedagog_typ >2)";
+            "SELECT 1
+             FROM   person_course
+             WHERE  person_course.id_course = $1
+                AND person_course.id_person = $2
+                AND CASE person_course.role_type
+                        WHEN 'G' THEN 5
+                        WHEN 'L' THEN 4
+                        WHEN 'E' THEN 3
+                    END >= $3
+                AND person_course.role_type IN ('E','L','G')";
         $this->dbh->query($sql, array($predmet_id, $pedagog_id, $roleID));
         return $this->dbh->RowCount() > 0;
     }

@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 class RoomsController extends AppController {
 
@@ -13,6 +13,7 @@ class RoomsController extends AppController {
 
     function index() {
         $all = $this->rooms->getAll();
+        FB::error($all);
         $this->set('rooms', $all);
     }
 
@@ -66,6 +67,7 @@ class RoomsController extends AppController {
         $room_types = $this->room_type->getAll();
         $this->set('room_types', $room_types);
         $equips = $this->rooms->getEquipment();
+        FB::error($equips);
         $this->set('equips', $equips);
         $this->set('equip', $_POST['vybavenie']);
     }

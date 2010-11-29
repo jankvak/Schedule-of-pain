@@ -42,11 +42,11 @@ class Rooms extends Model {
      * @return <array> miestnosti
      */
     function getAll($orderByName = false) {
-        $order = $orderByName? "ORDER BY m.nazov": "ORDER BY m.kapacita, mt.id, m.nazov";
+        $order = $orderByName? "ORDER BY r.name": "ORDER BY r.capacity, room_type";
         $query =
-            "SELECT m.id, m.nazov, m.kapacita, m.poznamka, mt.nazov as typ, mt.id as typ_id
-               FROM miestnost m, miestnost_typ mt
-               WHERE mt.id = m.id_miestnost_typ {$order}";
+            "SELECT r.id, r.name AS nazov, r.capacity AS kapacita, r.note AS poznamka, r.room_type AS typ, r.room_type AS typ_id
+               FROM room r
+               {$order}";
                
         $this->dbh->Query($query);
         return $this->dbh->fetchall_assoc();
@@ -55,9 +55,9 @@ class Rooms extends Model {
     // vrati informacie o danej miestnosti
     function get($id) {
         $query =
-            "SELECT m.id, m.nazov, m.kapacita, m.poznamka, mt.nazov as typ, mt.id as typ_id
-             FROM miestnost m, miestnost_typ mt
-             WHERE mt.id = m.id_miestnost_typ AND m.id = $1";
+            "SELECT r.id, r.name AS nazov, r.capacity AS kapacita, r.note AS poznamka, r.room_type AS id_miestnost_typ, r.room_type AS typ_id
+             FROM room r
+             WHERE r.id = $1";
         $this->dbh->query($query, array($id));
         return $this->dbh->fetch_assoc();
     }
@@ -66,15 +66,16 @@ class Rooms extends Model {
     function save() {
         $this->dbh->TransactionBegin();
         $query =
-            "INSERT INTO miestnost (nazov, kapacita, poznamka, id_miestnost_typ)
+            "INSERT INTO room (name, capacity, note, room_type)
 			 VALUES ($1, $2, $3, $4)";
         $this->dbh->query($query, array(
             $this->nazov, $this->kapacita, $this->poznamka, $this->id_miestnost_typ
         ));
         $id = $this->dbh->GetLastInsertID();
+        FB::error($id);
         foreach ($this->vybavenie as $eq) {
             $query =
-                "INSERT INTO vybavenie_miestnost (id_miestnost,id_vybavenie)
+                "INSERT INTO room_equipment (id_room,id_equipment)
             	 VALUES ($1, $2)";
             $this->dbh->query($query, array($id, $eq));
         }
@@ -85,20 +86,21 @@ class Rooms extends Model {
     function saveEdited() {
         $this->dbh->TransactionBegin();
         $query =
-            "UPDATE miestnost
-             SET nazov=$1, kapacita=$2, poznamka=$3, id_miestnost_typ=$4
+            "UPDATE room
+             SET name=$1, capacity=$2, note=$3, room_type=$4
              WHERE id=$5";
         $this->dbh->query($query, array(
             $this->nazov, $this->kapacita, $this->poznamka, $this->id_miestnost_typ,
             $this->id
         ));
-        $query = "DELETE FROM vybavenie_miestnost WHERE id_miestnost=$1";
+        $query = "DELETE FROM room_equipment WHERE id_room=$1";
         $this->dbh->query($query, array($this->id));
         foreach ($this->vybavenie as $eq)
         {
             $query =
-                "INSERT INTO vybavenie_miestnost (id_miestnost,id_vybavenie)
+                "INSERT INTO room_equipment (id_room,id_equipment)
             	 VALUES ($1, $2)";
+            //throw new Exception($eq);
             $this->dbh->query($query, array($this->id, $eq));
         }
         $this->dbh->TransactionEnd();
@@ -106,7 +108,7 @@ class Rooms extends Model {
 
     // vymaz miestnost
     function delete($id) {
-        $query = "DELETE FROM miestnost WHERE id=$1";
+        $query = "DELETE FROM room WHERE id=$1";
         $this->dbh->query($query, array($id));
     }
 
@@ -117,7 +119,7 @@ class Rooms extends Model {
      */
     function getCapacities($sort = "ASC") {
         $query =
-            "SELECT DISTINCT kapacita FROM miestnost ORDER BY kapacita {$sort}";
+            "SELECT DISTINCT capacity AS kapacita FROM room ORDER BY capacity {$sort}";
         $this->dbh->Query($query);
         return $this->dbh->fetchall_assoc();
     }
@@ -125,22 +127,18 @@ class Rooms extends Model {
     // vrati typy miestnosti, ku ktorym existuju nejake miestnosti
     function getTypes() {
         $query =
-            "	SELECT DISTINCT mt.id, mt.nazov
-				FROM 	miestnost_typ mt,
-						miestnost m
-				WHERE m.id_miestnost_typ = mt.id
-				ORDER BY mt.id";
+            "	SELECT DISTINCT room_type AS id_miestnost_typ
+				FROM 	room 
+				ORDER BY room_type";
         $this->dbh->Query($query);
         return $this->dbh->fetchall_assoc();
     }
 
     // pre jodnotlive typy miestnosti vrati kapacity, ktore su k dispozicii pre dane typy
     function getCapacitiesForTypes() {
-        $query = "	SELECT DISTINCT mt.id, m.kapacita
-					FROM 	miestnost_typ mt,
-							miestnost m
-					WHERE mt.id = m.id_miestnost_typ
-					ORDER BY mt.id, m.kapacita";
+        $query = "	SELECT DISTINCT r.room_type AS id_miestnost_typ, r.capacity AS kapacita
+					FROM 	room r
+					ORDER BY room_type, capacity";
         $this->dbh->Query($query);
         return $this->dbh->fetchall_assoc();
     }
@@ -148,16 +146,16 @@ class Rooms extends Model {
     // vrati vybavenie danej miestnosti
     function getRoomEquipment($id) {
         $query =
-            "SELECT *
-			 FROM vybavenie_miestnost
-			 WHERE id_miestnost=$1";
+            "SELECT id, id_equipment AS id_vybavenie, id_room AS id_miestnost
+			 FROM room_equipment
+			 WHERE id_room=$1";
         $this->dbh->query($query, array($id));
         return $this->dbh->fetchall_assoc();
     }
 
     // vrati vsetky mozne typy vybavenia
     function getEquipment() {
-        $query="SELECT * FROM vybavenie";
+        $query="SELECT e.id, e.type AS typ, e.portable AS prenosne, e.note AS poznamka FROM equipment e";
         $this->dbh->Query($query);
         return $this->dbh->fetchall_assoc();
     }
@@ -165,11 +163,13 @@ class Rooms extends Model {
     function getRoomName($nazov, $id) {
         if ($id == "")
         {
-            $query = "SELECT * FROM miestnost WHERE nazov=$1";
+            $query = "SELECT id, name AS nazov, capacity AS kapacita, note AS poznamka, room_type AS id_miestnost_typ 
+            FROM room WHERE name=$1";
             $params = array($nazov);
         }else
         {
-            $query = "SELECT * FROM miestnost WHERE nazov=$1 AND id!=$2";
+            $query = "SELECT id, name AS nazov, capacity AS kapacita, note AS poznamka, room_type AS id_miestnost_typ 
+            FROM room WHERE name=$1 AND id!=$2";
             $params = array($nazov, $id);
         }
         $this->dbh->query($query, $params);

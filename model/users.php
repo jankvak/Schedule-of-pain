@@ -32,7 +32,8 @@ class Users extends Model {
         $query =
             "SELECT p.id, p.login,
             {$this->vyskladajMeno("p")},
-             p.mail, p.pocet_hodin FROM pedagog p ORDER BY meno";
+             p.email FROM person p 
+			 ORDER BY name";
 
         $this->dbh->Query($query);
 
@@ -64,9 +65,9 @@ class Users extends Model {
     function getGroups($usr) {
 
         $query =
-            "SELECT s.nazov FROM clenstvo c
-			 JOIN skupina s ON c.id_skupina = s.id 
-			 WHERE c.id_pedagog = $1";
+            "SELECT s.name AS nazov FROM person_group c
+			 JOIN groups s ON c.id_group = s.id 
+			 WHERE c.id_person = $1";
         $this->dbh->query($query, array($usr));
         $skupiny = $this->dbh->fetchall_assoc();
 
@@ -83,7 +84,7 @@ class Users extends Model {
 
     // vrati nazvy skupin
     function getGroupNames() {
-        $query = "SELECT nazov,id FROM skupina";
+        $query = "SELECT name AS nazov,id FROM groups";
         $this->dbh->Query($query);
         return $this->dbh->fetchall_assoc();
     }
@@ -92,18 +93,18 @@ class Users extends Model {
     function save() {
         $this->dbh->TransactionBegin();
         $query =
-            "INSERT into pedagog (login, mail, priezvisko, meno, tituly_pred, tituly_za, ais_id)
+            "INSERT into person (login, email, last_name, name, titles_before, titles_after, ais_id)
 			 VALUES ($1, $2, $3, $4, $5, $6, $7)";
         $this->dbh->query($query, array(
             $this->username, $this->email, $this->priezvisko, $this->meno,
             $this->tituly_pred, $this->tituly_za, $this->ais_id
         ));
-        $query = "SELECT id from pedagog WHERE login=$1";
+        $query = "SELECT id from person WHERE login=$1";
         $this->dbh->query($query,array($this->username));
         $id=$this->dbh->fetch_assoc();
         foreach ($this->skupina as $grp) {
             $query =
-                "INSERT into clenstvo (id_pedagog,id_skupina) VALUES ($1, $2)";
+                "INSERT into person_group (id_person,id_group) VALUES ($1, $2)";
             $this->dbh->query($query, array($id['id'], $grp));
         }
         $this->dbh->TransactionEnd();
@@ -111,20 +112,20 @@ class Users extends Model {
 
     // vymaz daneho pouzivatela
     function delete($login) {
-        $query = "DELETE FROM pedagog WHERE login=$1";
+        $query = "DELETE FROM person WHERE login=$1";
         $this->dbh->query($query, array($login));
     }
 
     // vrati id skupin, v ktorych je dany pouzivatel
     function getUserGroups($id) {
-        $query = "SELECT id_skupina FROM clenstvo WHERE id_pedagog=$1";
+        $query = "SELECT id_group FROM person_group WHERE id_person=$1";
         $this->dbh->query($query, array($id));
         return $this->dbh->fetchall_assoc();
     }
 
 
     function getUserLogin($id) {
-        $query = "SELECT login FROM pedagog WHERE id=$1";
+        $query = "SELECT login FROM person WHERE id=$1";
         $this->dbh->query($query, array($id));
         $user = $this->dbh->fetch_assoc();
 
@@ -138,11 +139,11 @@ class Users extends Model {
     function edit() {
         $this->dbh->TransactionBegin();
 
-        $query = "DELETE from clenstvo WHERE id_pedagog=$1";
+        $query = "DELETE from person_group WHERE id_person=$1";
         $this->dbh->query($query, array($this->id));
 
         foreach ($this->skupina as $grp) {
-            $query = "INSERT into clenstvo (id_pedagog,id_skupina) VALUES ($1, $2)";
+            $query = "INSERT into person_group (id_person,id_group) VALUES ($1, $2)";
             $this->dbh->query($query, array($this->id, $grp));
         }
         $this->dbh->TransactionEnd();
@@ -177,7 +178,7 @@ class Users extends Model {
      * Vrati ID usera alebo 0 ak taky neexistuje
      */
     function getUserID() {
-        $query = "SELECT id FROM pedagog WHERE login=$1";
+        $query = "SELECT id FROM person WHERE login=$1";
         $this->dbh->query($query, array($this->username));
         if ($this->dbh->RowCount()) {
             $id = $this->dbh->fetch_assoc();
@@ -198,12 +199,12 @@ class Users extends Model {
     {
         if ($specPoradie)
         {
-            $res = "{$skratka}.priezvisko || ' ' || {$skratka}.meno || ', ' ||
-                {$skratka}.tituly_pred || ' ' || {$skratka}.tituly_za";
+            $res = "{$skratka}.last_name || ' ' || {$skratka}.name || ', ' ||
+                {$skratka}.titles_before || ' ' || {$skratka}.titles_after";
         }else
         {
-            $res = "{$skratka}.tituly_pred || ' ' || {$skratka}.meno || ' ' ||
-                {$skratka}.priezvisko || ', ' || {$skratka}.tituly_za";
+            $res = "{$skratka}.titles_before || ' ' || {$skratka}.name || ' ' ||
+                {$skratka}.last_name || ', ' || {$skratka}.titles_after";
         }
         // maly trik, ak nema obidva tituly aby neboli medzery na koncoch tak otrimujeme
         // (aj ciarku ked nema tituly)

@@ -249,15 +249,15 @@ class Notificator {
         //echo ($headers);
         //echo ($message);
 
-        if(mail("", $subject, $message, $headers))
-        {
-
-        }
-        else
-        {
+//        if(mail("", $subject, $message, $headers))
+//        {
+//
+//        }
+//        else
+//        {
         // todo nieco spravit ak sa nepodari odoslat
         // TODO: trapi nas ze neodosla notifikacia ? aj tak s tym nic moc nespravi
-        }
+    //    }
     }
 
     //*****************************GENERATORY SPRAV******************************************

@@ -1,4 +1,4 @@
-<h5>Export požiadaviek</h5><br>
+﻿<h5>Export požiadaviek</h5><br>
 <a href="scheduler/exportall/createdocall">Exportovať všetky požiadavky vo formáte MS Word</a><br>
 <a href="scheduler/exportall/createcsv">Exportovať všetky požiadavky vo formáte CSV</a><br><br>
 <table class="sorted-table paged-table filtered {sortlist:[[0,0]], pagesizes:[25,50,100], selpagesize: 0}">

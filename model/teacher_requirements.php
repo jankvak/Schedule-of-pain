@@ -76,12 +76,12 @@ class TeacherRequirements extends Model
 
     private function __nacitajTypy()
     {
-        $sql = "SELECT id FROM poziadavka_typ WHERE nazov='prednaska'";
+        $sql = "SELECT 1";// id FROM poziadavka_typ WHERE nazov='prednaska'";
         $this->dbh->Query($sql);
         $res = $this->dbh->fetch_assoc();
         $this->typ_poziadavky = $res["id"];
 
-        $sql = "SELECT id FROM skupina WHERE code='Lecturer'";
+        $sql = "SELECT 3";//id FROM skupina WHERE code='Lecturer'";
         $this->dbh->Query($sql);
         $res = $this->dbh->fetch_assoc();
         $this->typ_role = $res["id"];

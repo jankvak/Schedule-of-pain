@@ -31,6 +31,7 @@ class Auth extends Model {
     }
 
     public function login($username, $password) {
+    	FB::log($username);
         if(USE_LDAP) {
             try {
                 $this->ldap->autentificate($username, $password);

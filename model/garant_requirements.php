@@ -174,18 +174,18 @@ class GarantRequirements extends Model {
 
     function getLecturers() { // vytiahne zoznam vsetkych prednasajucich
         $query =
-            "SELECT p.id, p.meno, p.priezvisko, p.tituly_pred, p.tituly_za from pedagog p, clenstvo c, skupina s
-             WHERE p.id = c.id_pedagog AND s.id = c.id_skupina AND s.code = 'Lecturer'
-             ORDER by p.priezvisko";
+            "SELECT p.id, p.name, p.last_name, p.titles_before, p.titles_after from person p, person_group c, groups s
+             WHERE p.id = c.id_person AND s.id = c.id_group AND s.code = 'Lecturer'
+             ORDER by p.last_name";
         $this->dbh->Query($query);
         return $this->dbh->fetchall_assoc();
     }
 
     function getTeachers() { // vytiahne zoznam vsetkych cviciacich
         $query =
-            "SELECT p.id, p.meno, p.priezvisko, p.tituly_pred, p.tituly_za FROM pedagog p, clenstvo c, skupina s
-             WHERE p.id = c.id_pedagog AND s.id = c.id_skupina AND s.code = 'Pract'
-             ORDER by p.priezvisko";
+            "SELECT p.id, p.name, p.last_name, p.titles_before, p.titles_after from person p, person_group c, groups s
+             WHERE p.id = c.id_person AND s.id = c.id_group AND s.code = 'Pract'
+             ORDER by p.last_name";
         $this->dbh->Query($query);
         return $this->dbh->fetchall_assoc();
     }

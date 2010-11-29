@@ -1,1 +1,0 @@
-UPDATE pedagog SET mail='' ;

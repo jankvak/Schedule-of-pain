@@ -12,7 +12,9 @@ class EquipmentController extends AppController {
 
     function index() {
         $all = $this->equipment->getAll();
+        FB::error($all);
         $this->set('equipment', $all);
+        FB::error($this->equipment);
     }
 
     function edit($id) {

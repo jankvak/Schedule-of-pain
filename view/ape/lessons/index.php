@@ -23,7 +23,7 @@
 		$str = "<tr><td>{$pr['kod']}</td>";
 		$str .= "<td>{$pr['nazov']}</td>";
 		$str .= "<td>{$pr['sp_nazov']}</td>";
-		$str .= "<td><input type='hidden' name='garant[$i][id_predmet]' value='{$pr['id']}'/>";
+		$str .= "<td><input type='hidden' name='garant[$i][id_course]' value='{$pr['id']}'/>";
 		$str .= "<select name='garant[$i][id_garant]'>";
 		$str .= "<option value='0'>Vyberte garanta</option>";
 		foreach ($garanti as $gar){

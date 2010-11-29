@@ -60,15 +60,15 @@ class Periods extends Model
     public function getAll()
     {
         $sql =
-            "SELECT id, rok, semester, ";
-        $sql .= DateConvert::DBtoSK("zac_uc")." AS zac_uc,";
-        $sql .= DateConvert::DBtoSK("kon_uc")." AS kon_uc,";
-        $sql .= DateConvert::DBtoSK("zac_skus")." AS zac_skus,";
-        $sql .= DateConvert::DBtoSK("zac_opr")." AS zac_opr,";
-        $sql .= DateConvert::DBtoSK("kon_skus")." AS kon_skus ";
+            "SELECT id, year AS rok, semester_order AS semester, ";
+        $sql .= DateConvert::DBtoSK("tuition_start")." AS zac_uc,";
+        $sql .= DateConvert::DBtoSK("tuition_end")." AS kon_uc,";
+        $sql .= DateConvert::DBtoSK("exam_start")." AS zac_skus,";
+        $sql .= DateConvert::DBtoSK("exam_reparat_start")." AS zac_opr,";
+        $sql .= DateConvert::DBtoSK("exam_end")." AS kon_skus ";
         $sql .=
             "FROM semester
-			 ORDER BY rok DESC, semester DESC";
+			 ORDER BY year DESC, semester_order DESC";
         $this->dbh->Query($sql);
         return $this->dbh->fetchall_assoc();
     }
@@ -80,9 +80,9 @@ class Periods extends Model
     public function getShortAll()
     {
         $sql =
-            "SELECT id, rok, semester
+            "SELECT id, year AS rok, semester_order AS semester
 			 FROM semester
-			 ORDER BY rok DESC, semester DESC";
+			 ORDER BY year DESC, semester_order DESC";
         $this->dbh->Query($sql);
         return $this->dbh->fetchall_assoc();
     }
@@ -95,12 +95,12 @@ class Periods extends Model
     public function load($semesterID)
     {
         $sql =
-            "SELECT id, rok, semester, ";
-        $sql .= DateConvert::DBtoSK("zac_uc")." AS zac_uc,";
-        $sql .= DateConvert::DBtoSK("kon_uc")." AS kon_uc,";
-        $sql .= DateConvert::DBtoSK("zac_skus")." AS zac_skus,";
-        $sql .= DateConvert::DBtoSK("zac_opr")." AS zac_opr,";
-        $sql .= DateConvert::DBtoSK("kon_skus")." AS kon_skus ";
+            "SELECT id, year AS rok, semester_order AS semester, ";
+        $sql .= DateConvert::DBtoSK("tuition_start")." AS zac_uc,";
+        $sql .= DateConvert::DBtoSK("tuition_end")." AS kon_uc,";
+        $sql .= DateConvert::DBtoSK("exam_start")." AS zac_skus,";
+        $sql .= DateConvert::DBtoSK("exam_reparat_start")." AS zac_opr,";
+        $sql .= DateConvert::DBtoSK("exam_end")." AS kon_skus ";
         $sql .=
             "FROM semester
              WHERE id=$1";
@@ -114,7 +114,7 @@ class Periods extends Model
         if (empty($this->id))
         {
             $sql =
-                "INSERT INTO semester(rok, semester, zac_uc, kon_uc, zac_skus, zac_opr, kon_skus)
+                "INSERT INTO semester(year, semester_order, tuition_start, tuition_end, exam_start, exam_reparat_start, exam_end)
 			 VALUES ($1, $2, ";
             $sql .= DateConvert::SKtoDB("$3").",";
             $sql .= DateConvert::SKtoDB("$4").",";
@@ -129,13 +129,13 @@ class Periods extends Model
         }else{
             $sql =
                 "UPDATE semester
-                 SET rok=$1, 
-                 semester=$2, 
-                 zac_uc=".DateConvert::SKtoDB("$3").",
-                 kon_uc=".DateConvert::SKtoDB("$4").",
-                 zac_skus=".DateConvert::SKtoDB("$5").", 
-                 zac_opr=".DateConvert::SKtoDB("$6").", 
-                 kon_skus=".DateConvert::SKtoDB("$7")."
+                 SET year=$1, 
+                 semester_order=$2, 
+                 tuition_start=".DateConvert::SKtoDB("$3").",
+                 tuition_end=".DateConvert::SKtoDB("$4").",
+                 exam_start=".DateConvert::SKtoDB("$5").", 
+                 exam_reparat_start=".DateConvert::SKtoDB("$6").", 
+                 exam_end=".DateConvert::SKtoDB("$7")."
                  WHERE id=$8";
 
             $this->dbh->query($sql, array(
@@ -153,9 +153,9 @@ class Periods extends Model
     public function semesterExistuje()
     {
         $sql =
-            "SELECT rok, semester
+            "SELECT year AS rok, semester_order AS semester
 			 FROM semester
-			 WHERE semester=$1 AND rok=$2";
+			 WHERE semester_order=$1 AND year=$2";
         $params = array($this->semester, $this->rok);
         if (!empty($this->id))
         {
@@ -173,7 +173,7 @@ class Periods extends Model
      */
     public function getLastSemesterID()
     {
-        $sql = "SELECT id FROM semester ORDER BY rok DESC, semester DESC LIMIT 1";
+        $sql = "SELECT id FROM semester ORDER BY year DESC, semester_order DESC LIMIT 1";
         $this->dbh->Query($sql);
         $lastSem = $this->dbh->fetch_assoc();
         $this->dbh->Release();
@@ -189,14 +189,14 @@ class Periods extends Model
     public function getPrevSemester($semesterID)
     {
     // ziska udaje o dabin semestri aby vedel ziskat predosly
-        $sql = "SELECT rok, semester FROM semester WHERE id=$1";
+        $sql = "SELECT year AS rok, semester_order AS semester FROM semester WHERE id=$1";
         $this->dbh->query($sql, array($semesterID));
         $prev_semester = $this->dbh->fetch_assoc();
-        $prev_semester["rok"] -= 1;
+        $prev_semester["year"] -= 1;
         $sql =
             "SELECT id FROM semester
-			 WHERE rok=$1 AND semester=$2";
-        $this->dbh->query($sql, array($prev_semester["rok"], $prev_semester["semester"]));
+			 WHERE year=$1 AND semester_order=$2";
+        $this->dbh->query($sql, array($prev_semester["year"], $prev_semester["semester_order"]));
         if ($this->dbh->RowCount() == 0) return -1;
         else{
             $prev_semester = $this->dbh->fetch_assoc();
@@ -213,15 +213,15 @@ class Periods extends Model
     public function getPrevYearSemesters($semesterID)
     {
     // ziska udaje o dabin semestri aby vedel ziskat predosly
-        $sql = "SELECT rok FROM semester WHERE id=$1";
+        $sql = "SELECT year AS rok FROM semester WHERE id=$1";
         $this->dbh->query($sql, array($semesterID));
         $prev_semester = $this->dbh->fetch_assoc();
-        $prev_semester["rok"] -= 1;
+        $prev_semester["year"] -= 1;
         $sql =
             "SELECT id FROM semester
-			 WHERE rok=$1 AND semester=$2";
+			 WHERE year=$1 AND semester_order=$2";
         //najprv zimny
-        $this->dbh->query($sql, array($prev_semester["rok"],1));
+        $this->dbh->query($sql, array($prev_semester["year"],1));
         if ($this->dbh->RowCount() == 0) $retArr['ZS'] = -1;
         else{
             $prev_semester = $this->dbh->fetch_assoc();
@@ -229,7 +229,7 @@ class Periods extends Model
             $retArr['ZS'] = $prev_semester["id"];
         }
         //teraz letny
-        $this->dbh->query($sql, array($prev_semester["rok"],2));
+        $this->dbh->query($sql, array($prev_semester["year"],2));
         if ($this->dbh->RowCount() == 0) $retArr['LS'] = -1;
         else{
             $prev_semester = $this->dbh->fetch_assoc();

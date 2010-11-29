@@ -1,1 +1,0 @@
-DROP TABLE vykonana_aktualizacia;

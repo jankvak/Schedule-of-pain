@@ -14,15 +14,17 @@ class UserController extends AppController {
     function home()
     {
         $user = new User();
+        
         $usr = $user->findById($this->session->read('uid'));
+        fb($usr);
         $this->set('name',$this->session->read('name'));
         $this->set('mail', $usr["mail"]);
         
-        $calendar = new Calendar();
-        $actualEvents = $calendar->getActualEvents();
-        $futureEvents = $calendar->getFutureEvents();
-        $this->set('actualEvents', $actualEvents);
-        $this->set('futureEvents', $futureEvents);
+//        $calendar = new Calendar();
+//        $actualEvents = $calendar->getActualEvents();
+//        $futureEvents = $calendar->getFutureEvents();
+//        $this->set('actualEvents', $actualEvents);
+//        $this->set('futureEvents', $futureEvents);
     }
 
     public function change_sem()

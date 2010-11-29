@@ -12,9 +12,9 @@ class SuggestionType extends Model {
 // TODO: podpora pripomienok k rozvrhu
     function getAll() {
         $query =
-            'SELECT id, nazov
-			 FROM pripomienka_typ
-             WHERE rozvrh = FALSE';
+            "SELECT DISTINCT report_type AS id, report_type AS nazov
+			 FROM report
+             WHERE NOT report_type = 'rozvrh'";
         $this->dbh->Query($query);
         return $this->dbh->fetchall_assoc();
     }

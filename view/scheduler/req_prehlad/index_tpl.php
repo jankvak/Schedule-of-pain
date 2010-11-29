@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 // identifikuj pohlad podla toho co zobrazujeme
 if (isset($poziadavky_prednasky) && !isset($poziadavky_cvicenia)) 		$action = "prednaska";

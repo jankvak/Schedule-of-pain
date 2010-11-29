@@ -49,40 +49,58 @@ class Subjects extends Model {
     // vrati vsetky predmety z aktivneho semestra
     function getSubjects() {
         $query =
-            "SELECT p.id, p.nazov, p.kod, p.semester, p.studijny_program, p.sposob_ukoncenia,
-             p.blokovat_preberanie, COUNT(id_student) AS studentov
-             FROM predmet p
-             LEFT JOIN zapisany_predmet zp ON zp.id_predmet=p.id
-             WHERE id_semester=$1
-             GROUP BY p.id, p.nazov, p.kod, p.semester, p.studijny_program, p.sposob_ukoncenia, p.blokovat_preberanie
-             ORDER BY nazov";
+
+            "SELECT course.id,
+                    course.name AS name,
+                    course.code AS code,
+                    c2s.id_semester AS semester,
+                    c2sp.id_study_programme AS studijny_program,
+                    course.termination_method AS sposob_ukoncenia,
+                    false AS blokovat_preberanie,
+                    (SELECT COUNT(1)
+                     FROM   person_course
+                     WHERE  person_course.id_course = course.id
+                        AND person_course.id_group = '8') AS studentov,
+'' AS dovod_blokovania
+             FROM   course JOIN course_semester c2s ON course.id = c2s.id_course
+                           JOIN course_study_programme c2sp ON course.id = c2sp.id_course
+             WHERE  c2s.id_semester = $1
+             ORDER BY course.name";
         $this->dbh->query($query, array($this->id_semester));
         return $this->dbh->fetchall_assoc();
     }
 
     // vrati informacie o danom predmete
     function getSubject($id) {
-        $query = "SELECT * FROM predmet WHERE id=$1";
+        $query = "SELECT c.id, s.semester_order AS semester, csp.id_study_programme AS studijny_program, c.termination_method AS sposob_ukoncenia,
+		c.name AS nazov, c.abbreviation AS skratka, cs.id_semester AS semester, c.lecture_hours AS pred_hod, c.exercise_hours AS cvic_hod,
+		c.lecture_count AS prednas_pocet, c.lecture_count AS cvic_pocet, c.student_count AS student_poc, c.exercise_capacity AS kapacita_cvic,
+		c.code AS kode, true AS blokovat_preberanie,'' AS dovod_blokovania
+        FROM course c 
+        JOIN course_study_programme csp ON csp.id_course=c.id
+        JOIN course_semester cs ON cs.id_course = c.id
+        JOIN semester s ON cs.id_semester = s.id
+         WHERE c.id=$1";
         $this->dbh->query($query, array($id));
         return $this->dbh->fetch_assoc();
     }
 
     // vymaze dany predmet
     function delete($id) {
-        $query = "DELETE FROM predmet WHERE id=$1";
+        $query = "DELETE FROM course WHERE id=$1";
         $this->dbh->query($query, array($id));
     }
 
     // vrati vsetky studijne programy
     function getPrograms() {
-        $query = "SELECT * FROM studijny_program";
+        $query = "SELECT id, name AS nazov FROM study_programme";
         $this->dbh->Query($query);
         return $this->dbh->fetchall_assoc();
     }
 
     // vrati vsetky sposoby ukoncenia
     function getExamTypes() {
-        $query = "SELECT * FROM sposob_ukoncenia";
+        $query = "SELECT DISTINCT termination_method AS nazov, termination_method AS id FROM course GROUP BY nazov";
         $this->dbh->Query($query);
         return $this->dbh->fetchall_assoc();
     }
@@ -90,16 +108,40 @@ class Subjects extends Model {
     // uloz novy predmet
     function save() {
         $query =
-            "INSERT INTO predmet (id_semester, nazov, kod, semester, studijny_program, sposob_ukoncenia)
-				 VALUES ($1, $2, $3, $4, $5, $6)";
+            "INSERT INTO course (id, name, code, termination_method)
+                    VALUES (DEFAULT, $1, $2, $3) RETURNING id";
         $this->dbh->query($query, array(
-            $this->id_semester, $this->nazov, $this->kod, $this->semester,
-            $this->studijny_program, $this->sposob_ukoncenia
+            $this->nazov, $this->kod, $this->sposob_ukoncenia
+        ));
+        
+        //$id_course = $this->dbh->fetch();
+        $id_course=$this->dbh->GetLastInsertID();
+        $query =
+            "INSERT INTO course_semester (id_course, id_semester)
+                   VALUES ($1, $2)";
+        $this->dbh->query($query, array(
+            $id_course, $this->id_semester
+        ));
+        $query =
+            "INSERT INTO course_study_programme (id_course, id_study_programme)
+                    VALUES ($1, $2)";
+        $this->dbh->query($query, array(
+            $id_course, $this->studijny_program
         ));
     }
 
     // zmen informacie existujuceho predmetu
     function saveEdited($id) {
+        $query =
+            "UPDATE course
+                SET name = $1,
+                    code = $2,
+                    termination_method = $3
+              WHERE id = $4";
+        $this->dbh->query($query, array(
+            $this->nazov, $this->kod, $this->sposob_ukoncenia, $id
+        ));
+        /*
         $query =
             "UPDATE predmet
 				 SET nazov=$1, kod=$2, semester=$3, 
@@ -108,7 +150,7 @@ class Subjects extends Model {
         $this->dbh->query($query, array(
             $this->nazov, $this->kod, $this->semester, $this->studijny_program,
             $this->sposob_ukoncenia, $id
-        ));
+        ));*/
     }
 
     // vrati true ak dany kod uz existuje
@@ -116,10 +158,17 @@ class Subjects extends Model {
     // konfliktne kody v inom obdobi mozu existovat
         if ($this->id)
         {
-            $query = "SELECT kod FROM predmet WHERE kod=$1 AND id!=$2 AND id_semester=$3";
+            $query = "SELECT code
+                      FROM   course JOIN course_semester c2s ON course.id = c2s.id_course
+                      WHERE  course.code = $1
+                         AND course.id != $2
+                         AND c2s.id_semester = $3";
             $params = array($this->kod, $this->id, $semesterID);
         }else{
-            $query = "SELECT kod FROM predmet WHERE kod=$1 AND id_semester=$2";
+            $query = "SELECT code
+                      FROM   course JOIN course_semester c2s ON course.id = c2s.id_course
+                      WHERE  course.code = $1
+                         AND c2s.id_semester = $2";
             $params = array($this->kod, $semesterID);
         }
         $this->dbh->query($query, $params);
@@ -129,7 +178,7 @@ class Subjects extends Model {
     public static function getSubjectInfo($id_predmet) {
         $dbh = Connection::get();
 
-        $query = "SELECT nazov,kod FROM predmet WHERE id = $1";
+        $query = "SELECT name AS nazov, code AS kod FROM subject WHERE id = $1";
 
         $dbh->query($query, array($id_predmet));
         if ($dbh->RowCount()>0)
@@ -143,7 +192,7 @@ class Subjects extends Model {
 
     // vrati pocet studentov zapisanych na dany predmet
     public function getStudentCount($id_predmet) {
-        $query = "SELECT count(id) as count from zapisany_predmet where id_predmet = $1";
+        $query = "SELECT count(id) as count from person_course where id_predmet = $1 AND id_group = '8'";
         $this->dbh->query($query, array($id_predmet));
         return $this->dbh->fetch_assoc();
     }
@@ -152,13 +201,13 @@ class Subjects extends Model {
     // nie je potrebne filtrovat aj podla semestra, lebo predmet ako taky
     // je specificky pre kazdy semester (kazdy semester ma ine id)
         $query =
-            "SELECT student.rocnik, studijny_program.nazov, COUNT(*) AS student_count
-             FROM student
-             LEFT JOIN studijny_program ON student.id_studijny_program=studijny_program.id
-             JOIN zapisany_predmet ON zapisany_predmet.id_student=student.id
-             WHERE zapisany_predmet.id_predmet = $1 
-             GROUP BY student.id_studijny_program, student.rocnik, studijny_program.nazov
-             ORDER BY student.id_studijny_program";
+            "SELECT person.grade AS rocnik, study_programme.name AS nazov, COUNT(1) AS student_count
+             FROM   person JOIN person_study_programme p2sp ON person.id = p2sp.id_person
+                           JOIN study_programme sp ON p2sp.id_study_programme = sp.id
+                           JOIN person_course p2c ON person.id = p2c.id_person
+             WHERE  p2c.id_course = $1
+             GROUP BY study_programme.id, person.grade, study_programme.name
+             ORDER BY study_programme.id";
         $this->dbh->query($query, array($id_predmet));
         return $this->dbh->fetchall_assoc();
     }
@@ -170,10 +219,23 @@ class Subjects extends Model {
         $garantID = $this->getGarantID();
 
         $query =
-            "SELECT predmet.nazov, predmet.semester, predmet.kod, predmet.sposob_ukoncenia, predmet.studijny_program, predmet.id_semester, vyucuje_predmet.id_pedagog
-             FROM predmet, vyucuje_predmet
-             WHERE (predmet.id = vyucuje_predmet.id_predmet AND id_semester = $1  AND id_pedagog_typ=$2)";
-
+            "SELECT course.name AS nazov,
+                    c2s.id_semester AS semester,
+                    course.code AS kod,
+                    course.termination_method AS sposob_ukoncenia,
+                    c2sp.id_study_programme AS studijny_program,
+                    c2s.id_semester AS id_semester,
+                    p2c.id_person AS id_pedagog
+             FROM   course JOIN course_semester c2s ON course.id = c2s.id_course
+                           JOIN course_study_programme c2sp ON course.id = c2sp.id_course
+                           JOIN person_course p2c ON course.id = p2c.id_course
+                                                  AND p2c.role_type = CASE $2
+                                                                        WHEN 3 THEN 'E'
+                                                                        WHEN 4 THEN 'L'
+                                                                        WHEN 5 THEN 'G'
+                                                                      END
+             WHERE  c2s.id_semester = $1";
+        
         $this->dbh->query($query, array($prevPeriodID, $garantID));
 
         $predmety = $this->dbh->fetchall_assoc();
@@ -205,33 +267,40 @@ class Subjects extends Model {
 
     // metoda meni flag blokovania preberania pre konkretny predmet
     public function changeSubjectsBlockStatus($subjectId, $block) {
-        $sql = "UPDATE predmet SET blokovat_preberanie=$1 WHERE id=$2";
-        $this->dbh->query($sql, array($block, $subjectId));
+        //TODO:tu zrejme nemenit nic
+        //$sql = "UPDATE predmet SET blokovat_preberanie=$1 WHERE id=$2";
+        //$this->dbh->query($sql, array($block, $subjectId));
     }
 
     // pri blokovani je mozne zadat aj komentar a ten sa tu uklada
     public function saveSubjectsBlockComment($subjectId, $comment) {
-        $sql = "UPDATE predmet SET dovod_blokovania=$1 WHERE id=$2";
-        $this->dbh->query($sql, array($comment, $subjectId));
+        //TODO:tu zrejme nemenit nic
+        //$sql = "UPDATE predmet SET dovod_blokovania=$1 WHERE id=$2";
+        //$this->dbh->query($sql, array($comment, $subjectId));
     }
 
     // Vrati ci je alebo nie blokovane preberanie poziadaviek a komentar k tomu
     public function isBlockedCopying($subjectId) {
-        $sql = "SELECT blokovat_preberanie, dovod_blokovania FROM predmet WHERE id=$1";
-        $this->dbh->query($sql, array($subjectId));
+        //TODO:tu zrejme nemenit nic
+        //$sql = "SELECT blokovat_preberanie, dovod_blokovania FROM predmet WHERE id=$1";
+        //$this->dbh->query($sql, array($subjectId));
 
-        return $this->dbh->fetch_assoc();
+        //return $this->dbh->fetch_assoc();
     }
 
     private function existSubjectCode($code, $actualPeriodID){
 
-        $query = "SELECT kod FROM predmet WHERE (kod='$1' AND id_semester=$2)";
+        $query =
+            "SELECT 1
+             FROM   course JOIN course_semester c2s ON course.id = c2s.id_course
+             WHERE  (course.code='$1' AND c2s.id_semester=$2)";
         $this->dbh->query($query , array($code, $actualPeriodID));
 
         return $this->dbh->RowCount() >= 1;
     }
 
     private function getGarantID() {
+        //TODO: upravit podla Petovho modelu
         $query="SELECT id FROM skupina WHERE code='Garant'";
         $this->dbh->Query($query);
         $result=$this->dbh->fetch_assoc();
@@ -241,21 +310,32 @@ class Subjects extends Model {
     private function saveSubject($predmet,$actualPeriodID) {
 
         $query =
-            "INSERT INTO predmet (nazov,semester,kod,sposob_ukoncenia,studijny_program,id_semester)
-			 		 VALUES ($1, $2, $3, $4, $5, $6)";
+            "INSERT INTO course (id, name, code, termination_method)
+                    VALUES (DEFAULT, $1, $2, $3)";
         $this->dbh->query($query, array(
-            $predmet['nazov'], $predmet['semester'],
-            $predmet['kod'], $predmet['sposob_ukoncenia'],
-            $predmet['studijny_program'], $actualPeriodID
+            $predmet['nazov'], $predmet['kod'], $predmet['sposob_ukoncenia']
+        ));
+        $id_course = $this->dbh->fetch();
+        $query =
+            "INSERT INTO course_semester(id_course, id_semester)
+                    VALUES ($1, $2)";
+        $this->dbh->query($query, array(
+            $id_course, $actualPeriodID
+        ));
+        $query =
+            "INSERT INTO course_study_programme(id_course, id_study_programme)
+                    VALUES ($1, $2)";
+        $this->dbh->query($query, array(
+            $id_course, $predmet['studijny_program']
         ));
     }
 
     private function saveGarant($predmetID,$pedagogID,$garantID){
         $query =
-            "INSERT INTO vyucuje_predmet (id_predmet,id_pedagog,id_pedagog_typ)
-					 VALUES ($1, $2, $3)";
+            "INSERT INTO person_course (id_course,id_person,id_group)
+					 VALUES ($1, $2, 2)";
         $this->dbh->query($query, array(
-            $predmetID, $pedagogID, $garantID
+            $predmetID, $pedagogID
         ));
     }
 }

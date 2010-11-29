@@ -47,11 +47,11 @@ class Suggestions extends Model
     function getAll()
     {
         $query =
-            "SELECT p.id, p.text, p.casova_peciatka, p.id_pedagog, p.stav, pt.nazov as typ, pt.id as typ_id, ".
-            Users::vyskladajMeno("pedagog", "pedagog_meno", false).
-            "FROM pripomienka p, pripomienka_typ pt, pedagog
-             WHERE pt.id = p.pripomienka_typ_id AND pedagog.id = p.id_pedagog AND pt.rozvrh = FALSE
-             ORDER BY p.stav";
+            "SELECT r.id, r.body AS text, r.timestamp AS casova_peciatka, r.id_person AS pedagog_meno, r.status AS nazovStavu, r.report_type AS typ, ".
+            Users::vyskladajMeno("person", "name", false).
+            "FROM report r, person
+             WHERE person.id = r.id_person
+             ORDER BY r.status";
         $this->dbh->Query($query);
         $retArr = $this->dbh->fetchall_assoc();
         $this->__pridajNazvyStavov($retArr);
@@ -66,10 +66,10 @@ class Suggestions extends Model
     function get($id)
     {
         $query =
-            "SELECT p.id, p.text, p.casova_peciatka, p.id_pedagog, p.stav, pt.nazov as typ, pt.id as pripomienka_typ_id, ".
-            Users::vyskladajMeno("pedagog", "pedagog_meno", false).
-            "FROM pripomienka p, pripomienka_typ pt, pedagog
-             WHERE p.id = $1 AND pt.id = p.pripomienka_typ_id AND pedagog.id = p.id_pedagog AND pt.rozvrh = FALSE";
+            "SELECT r.id, r.body AS text, r.timestamp AS casova_peciatka, r.id_person AS pedagog_meno, r.status AS nazovStvu, report_type AS typ, ".
+            Users::vyskladajMeno("person", "name", false).
+            "FROM report r, person
+             WHERE r.id = $1 AND person.id = p.id_person";
         $this->dbh->query($query, array($id));
         return $this->dbh->fetch_assoc();
     }
@@ -82,11 +82,10 @@ class Suggestions extends Model
     function getAllFromUser($pedagog_id)
     {
         $sql =
-            "SELECT p.id, p.text, p.casova_peciatka, p.stav, pt.nazov as typ
-            FROM pripomienka p
-            JOIN pripomienka_typ pt ON pt.id=p.pripomienka_typ_id
-            WHERE p.id_pedagog=$1
-            ORDER BY p.casova_peciatka ASC";
+            "SELECT r.id, r.body AS text, r.timestamp AS casova_peciatka, r.status AS nazovStavu, report_type AS typ
+            FROM report r
+            WHERE r.id_person=$1
+            ORDER BY r.timestamp ASC";
         $this->dbh->query($sql, array($pedagog_id));
         $retArr = $this->dbh->fetchall_assoc();
         $this->__pridajNazvyStavov($retArr);
@@ -117,7 +116,7 @@ class Suggestions extends Model
      */
     function getTypes()
     {
-        $query = "SELECT id, nazov FROM pripomienka_typ";
+        $query = "SELECT DISTINCT report_type AS id,report_type AS nazov FROM report";
         $this->dbh->Query($query);
         return $this->dbh->fetchall_assoc();
     }
@@ -131,11 +130,15 @@ class Suggestions extends Model
     // aj ako premenna modelu ???? (public $id_pedagog;)
     function save($uid)
     {
-        $this->casova_peciatka = time();
+
+
+$this->casova_peciatka = time();
         //stav pripomienky ma v databaze svoju default hodnotu
         $query =
-            "INSERT INTO pripomienka(text, casova_peciatka, id_pedagog, pripomienka_typ_id)
-             VALUES ($1, $2, $3, $4)";
+            "INSERT INTO report(body, timestamp, id_person, report_type)
+            
+       		 VALUES ($1, $2, $3, $4)";
+         //VALUES ($1, $2, $3, $4)";
         $this->dbh->query($query, array(
             $this->text, $this->casova_peciatka, $uid,
             $this->pripomienka_typ_id
@@ -154,8 +157,8 @@ class Suggestions extends Model
     function editSpatnaVazba($id)
     {
         $query =
-            "UPDATE pripomienka
-             SET pripomienka_typ_id=$1, stav=$2, text=$3
+            "UPDATE report
+             SET report_type=$1, status=$2, body=$3
              WHERE id=$4";
         $this->dbh->query($query, array($this->pripomienka_typ_id,
             $this->stav, $this->text, $id)
@@ -164,7 +167,7 @@ class Suggestions extends Model
         // poslem si casovu peciatku, aby sa dala pridat do notifikatora
         // url adresa ktora bude mat aj parameter s filtrom a to bude datum
         $query =
-            "SELECT casova_peciatka FROM pripomienka WHERE id=$1";
+            "SELECT timestamp FROM report WHERE id=$1";
         $this->dbh->query($query, $id);
         $row = $this->dbh->fetch_row();
         $this->casova_peciatka = date("d.m.Y H:i", $row[0]) ;
@@ -178,7 +181,7 @@ class Suggestions extends Model
     {
         if (!empty($id))
         {
-            $query = "DELETE FROM pripomienka WHERE id=$1";
+            $query = "DELETE FROM report WHERE id=$1";
             $this->dbh->query($query, array($id));
         }
     }

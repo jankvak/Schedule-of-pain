@@ -1,1 +1,0 @@
-Ľutujeme, do tejto časti stránky nemáte prístup. Ak si myslíte, že by ste sem prístup mali mať, kontaktujte administrátora aplikácie.

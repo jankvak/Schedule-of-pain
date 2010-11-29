@@ -240,7 +240,7 @@ class db
         $row = $this->fetch_assoc();
         return $row['last_id'];
     }
-
+ 
     /**
      * Returns the last SQL statement executed
      *
@@ -811,6 +811,19 @@ class db
         while ($row = $this->fetch_assoc($conv)) $retval[] = $row;
 
         return $retval;
+    }
+
+    /**
+     * Returns the result of last statement
+     */
+    public function fetch()
+    {
+
+        if (!$this->last_result)
+        {
+            throw new dbException("No result to fetch");
+        }
+        return $this->last_result;
     }
     
     /*

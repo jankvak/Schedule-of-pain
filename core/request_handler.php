@@ -16,7 +16,9 @@ class RequestHandler {
     //	spracovanie requestu
     //
     public function handle() {
+    	
         $page = htmlspecialchars(@$_GET['page']);
+        FB::log($page);
         $page = $this->getPageIfEmpty($page);
 
         $view = $this->pageData($page);

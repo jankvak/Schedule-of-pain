@@ -29,6 +29,7 @@ class AppController extends Controller {
 		if(property_exists($this, 'access')) {
 			$groups = $this->session->read('groups');
 			// kazdy je defaultne v skupine All
+			FB::log($groups);
 			$groups = array_merge($groups, array("All"));
 			$role_match = array_intersect($groups, $this->access);
 
@@ -105,6 +106,7 @@ class AppController extends Controller {
 	public function isAdmin()
 	{
 		$groups = $this->session->read("groups");
+		FB::log($sgroups);	
 		return array_search("Admin", $groups);
 	}
 	
@@ -115,7 +117,8 @@ class AppController extends Controller {
 	 */
 	public function isActiveSemesterReadOnly()
 	{
-		return $this->accessValidator->isReadOnlySemester($this->getSemesterID());
+		//return $this->accessValidator->isReadOnlySemester($this->getSemesterID());
+		return false;
 	}
 
 	/**

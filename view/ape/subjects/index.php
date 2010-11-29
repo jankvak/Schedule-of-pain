@@ -19,7 +19,7 @@
 	<tbody>
 	<?php
 		foreach ($predmety as $pr){
-			echo "<tr id={$pr['id']}><td>{$pr['nazov']}</td><td>{$pr['kod']}</td><td>{$pr['semester']}</td>";
+			echo "<tr id={$pr['id']}><td>{$pr['name']}</td><td>{$pr['code']}</td><td>{$pr['semester']}</td>";
 			foreach ($programy as $prog){
 				if ($prog['id']==$pr['studijny_program']) echo "<td>{$prog['nazov']}</td>";
 			}

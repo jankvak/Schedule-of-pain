@@ -45,10 +45,11 @@ class Calendar extends Model
     public function getAllEvents($semesterId)
     {
         $sql =
-            "SELECT zaciatok AS start, koniec AS end, s.rok, s.semester
-             FROM rozvrhova_akcia ra
-             JOIN semester s ON s.id=ra.id_semester
-             WHERE id_semester=$1";
+            "SELECT time_event.start AS start, time_event.end AS end, semester.year AS rok, semester.id AS semester
+             FROM   event JOIN semester ON event.id_semester = semester.id
+                          JOIN event_time_event e2t ON event.id = e2t.id_event
+                          JOIN time_event ON e2t.id_time_event = time_event.id
+             WHERE  semester.id = $1";
         
         $this->dbh->query($sql,array($semesterId));
 
@@ -74,14 +75,19 @@ class Calendar extends Model
     {
         $sql =
             "SELECT ".
-            DateConvert::DBTimestampToSkDateTime("zaciatok"). " AS start, ".
-            DateConvert::DBTimestampToSkDateTime("koniec"). " AS end,
-             s.rok, s.semester
-             FROM rozvrhova_akcia ra
-             JOIN semester s ON s.id=ra.id_semester
-             WHERE zaciatok <= LOCALTIMESTAMP 
-             AND koniec > LOCALTIMESTAMP
-             ORDER BY start DESC";
+                DateConvert::DBTimestampToSkDateTime("time_event.start"). " AS start, ".
+                DateConvert::DBTimestampToSkDateTime("time_event.end"). " AS start, ".
+            "       semester.year,
+                    semester.id
+             FROM   event JOIN semester ON event.id_semester = semester.id
+                          JOIN event_time_event e2t ON event.id = e2t.id_event
+                          JOIN time_event ON e2t.id_time_event = time_event.id
+             WHERE  LOCALTIME
+                        BETWEEN time_event.start - date_trunc('DAY', time_event.start)
+                        AND time_event.end - date_trunc('DAY', time_event.end)
+               AND  CAST((EXTRACT('DAY' FROM age(date_trunc('DAY', NOW()), date_trunc('DAY', time_event.start)))) as integer) %recur_freq = 0
+               AND  abs(EXTRACT('DAY' FROM age(date_trunc('DAY', NOW()), date_trunc('DAY', time_event.start))/recur_freq)) < recur_count
+             ORDER BY time_event.start DESC";
                  
         $this->dbh->query($sql);
 
@@ -107,15 +113,16 @@ class Calendar extends Model
     {
         $sql =
             "SELECT ".
-            DateConvert::DBTimestampToSkDateTime("zaciatok"). " AS start, ".
-            DateConvert::DBTimestampToSkDateTime("koniec"). " AS end,
-             s.rok, s.semester
-             FROM rozvrhova_akcia ra
-             JOIN semester s ON s.id=ra.id_semester
-             WHERE zaciatok > LOCALTIMESTAMP
-             ORDER BY start DESC";                 
-
-
+                DateConvert::DBTimestampToSkDateTime("time_event.start"). " AS start, ".
+                DateConvert::DBTimestampToSkDateTime("time_event.end"). " AS start, ".
+            "       semester.year,
+                    semester.id
+             FROM   event JOIN semester ON event.id_semester = semester.id
+                          JOIN event_time_event e2t ON event.id = e2t.id_event
+                          JOIN time_event ON e2t.id_time_event = time_event.id
+             WHERE  LOCALTIME < time_event.end + time_event.recur_freq * (time_event.recur_count-1) * INTERVAL '1 day'
+             ORDER BY time_event.start DESC";
+            
         $this->dbh->query($sql);
 
         $retArr = $this->dbh->fetchall_assoc();

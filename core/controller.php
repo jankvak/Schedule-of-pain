@@ -52,17 +52,19 @@ class Controller extends AutoLoadable {
     }
 
     public function render($view) {
+    	
         if(!$this->rendered)
         {
             $user = $this->session->read("uid");
             if (!empty($user))
             {
                 $this->set("read_only_semester", $this->isActiveSemesterReadOnly());
+                            
             } else {
                 // vlozi fiktivnu hodnotu true ak nie je prihlaseny (avoid notices)
                 $this->set("read_only_semester", true);
             }
-            	
+
             extract($this->viewData, EXTR_SKIP);
 
             ob_start();

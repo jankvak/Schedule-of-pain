@@ -49,14 +49,15 @@ class MetaRequests extends Model
      */
     public function getLastMetaRequest($predmetID, $typPoziadavky) {
         $query =
-            "SELECT mp.id, mp.id_predmet, ".
-            DateConvert::DBTimestampToSkDateTime("mp.cas_pridania")." AS cas_pridania, ".
-            Users::vyskladajMeno("p", "pedagog", false).
-            "FROM meta_poziadavka mp
-        	 JOIN pedagog p ON p.id=mp.id_osoba
-        	 WHERE mp.id_predmet=$1 AND mp.id_poziadavka_typ=$2
-        	 ORDER BY mp.cas_pridania DESC
-        	 LIMIT 1";
+            "SELECT request.id,
+                    event.id_course,".
+                    DateConvert::DBTimestampToSkDateTime("request.timestamp")." AS cas_pridania, ".
+                    Users::vyskladajMeno("person", "pedagog", false).
+            "FROM   request JOIN event ON request.id_event = event.id
+                            JOIN person ON request.id_person = person.id
+             WHERE  event.id_course = $1 AND event.event_type = $2
+             ORDER BY request.timestamp DESC
+             LIMIT 1";
         $this->dbh->query($query, array(
             $predmetID, $typPoziadavky
         ));
@@ -67,13 +68,14 @@ class MetaRequests extends Model
     public function getAllRequests($predmetID, $typPoziadavky)
     {
         $query =
-            "SELECT mp.id, mp.id_predmet, ".
-            DateConvert::DBTimestampToSkDateTime("mp.cas_pridania")." AS cas_pridania, ".
-            Users::vyskladajMeno("p", "pedagog", false).
-            "FROM meta_poziadavka mp
-        	 JOIN pedagog p ON p.id=mp.id_osoba
-        	 WHERE mp.id_predmet=$1 AND mp.id_poziadavka_typ=$2
-        	 ORDER BY mp.cas_pridania DESC";
+            "SELECT request.id,
+                    event.id_course,".
+                    DateConvert::DBTimestampToSkDateTime("request.timestamp")." AS cas_pridania, ".
+                    Users::vyskladajMeno("person", "pedagog", false).
+            "FROM   request JOIN event ON request.id_event = event.id
+                            JOIN person ON request.id_person = person.id
+             WHERE  event.id_course = $1 AND event.event_type = $2
+             ORDER BY request.timestamp DESC";
         $this->dbh->query($query, array(
             $predmetID, $typPoziadavky
         ));

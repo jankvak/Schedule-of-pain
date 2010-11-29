@@ -24,21 +24,22 @@ class User extends Model {
 
     // vrati informacie o danom pouzivatelovi
     public function findByLogin($login) {
+    		FB::error("robim");
         $query =
-            "SELECT p.id, p.login, p.mail, p.posielat_moje_zmeny, p.ais_id, ".
-            Users::vyskladajMeno("p", "meno", false).
-            "FROM pedagog p
+            "SELECT p.id, p.login, p.email, p.notification_on, p.ais_id, ".
+            Users::vyskladajMeno("p", "name", false).
+            "FROM person p
         	 WHERE login = $1";
 
         $this->dbh->query($query, array($login));
         $user = $this->dbh->fetch_assoc();
-
+		//fb($user);
         if (!empty ($user['id'])) {
             $user['groups'] = $this->loadGroups($user['id']);
         }
 
         //$user['posielat_moje_zmeny'] = ($user['posielat_moje_zmeny'] = 't') ? TRUE : FALSE;
-        $user['posielat_moje_zmeny'] = $this->convertBoolean($user['posielat_moje_zmeny']);
+        $user['notification_on'] = $this->convertBoolean($user['notification_on']);
         return $user;
     }
 
@@ -48,9 +49,9 @@ class User extends Model {
         $this->notifyMyActions = isset($this->notifyMyActions);
         // update v DB
         $sql =
-            "UPDATE pedagog
-             SET mail=$1,
-             posielat_moje_zmeny=$2 
+            "UPDATE person
+             SET email=$1,
+             notification_on=$2 
              WHERE id=$3";
         $this->dbh->query($sql, array(
             $this->mail,
@@ -61,16 +62,15 @@ class User extends Model {
 
     private function loadGroups($uid) {
         $query =
-            "SELECT s.code FROM pedagog p
-        	 JOIN clenstvo c ON c.id_pedagog = p.id
-        	 JOIN skupina s ON c.id_skupina = s.id 
+            "SELECT s.code FROM person p
+        	 JOIN person_group c ON c.id_person = p.id
+        	 JOIN groups s ON c.id_group = s.id 
 			 WHERE p.id = $1";
 
         $this->dbh->query($query, array($uid));
         $rows = $this->dbh->fetchall_assoc();
-
         $groups = array ();
-
+		
         foreach ($rows as $row) {
             $groups[] = $row["code"];
         }
@@ -88,13 +88,13 @@ class User extends Model {
      */
     public function findById($id, $loadGroups = false) {
         $query =
-            "SELECT p.id, p.login, p.mail, p.ais_id, ".
-            Users::vyskladajMeno("p", "meno", false).
-            "FROM pedagog p WHERE id=$1";
+            "SELECT p.id, p.login, p.email, p.ais_id, ".
+            Users::vyskladajMeno("p", "name", false).
+            "FROM person p WHERE id=$1";
 
         $this->dbh->query($query,array($id));
         $user = $this->dbh->fetch_assoc();
-
+        $user['groups'] = $this->loadGroups($user['id']);
         if (!empty ($user['id']) && $loadGroups) {
             $user['groups'] = $this->loadGroups($user['id']);
         }

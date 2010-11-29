@@ -1,4 +1,4 @@
-<?php 
+﻿<?php 
     $zadane = $nezadane = array();
 foreach($requirements as $course) {
     if(is_null($course['skratka']) || is_null($course['pred_hod']) || is_null($course['cvic_hod']))
