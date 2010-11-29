@@ -57,7 +57,7 @@ class GarantRequirements extends Model {
     // vrati poziadavky vzhladom na pouzivatela pre aktivny semester
     function getForUser($userid, $semesterID) {
         $courses = new Courses();
-        return $courses->getForUser($userid, $semesterID, 3);
+        return $courses->getForUser($userid, $semesterID, 2);
     }
 
     /**
