@@ -1,0 +1,1 @@
+Najprv je potrebne vytvorit tabulky:1. menu.sql2. collaboration.sql3. collaboration_role.sql4. collaboration_data.sql5. collaboration_person_role.sqlPotom importovat testovacie data, ktorych zatial nie je vela:1. collaboration.backup2. collaboration_role.backup3. collaboration_person_role.backupna vyskusanie sa prihlaste ako xkorenek :)

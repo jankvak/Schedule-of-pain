@@ -1,0 +1,1 @@
+CREATE TABLE collaboration(  id serial NOT NULL,  code character varying(30) NOT NULL,  "name" character varying(30) NOT NULL,  CONSTRAINT collaboration_pkey PRIMARY KEY (id))
