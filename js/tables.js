@@ -64,7 +64,7 @@ $(document).ready(function() {
 		boxName = 'filter-box-'+index;
 		clearName = 'filter-clear-'+index;
 		filter = 'Hľadaj: <input name="filter" id="'+boxName+'" value="" maxlength="30" size="30" type="text">';
-		filter += '<input id="'+clearName+'" type="submit" value="Zmazať"/>';
+		filter += '<input id="'+clearName+'" type="button" value="Zmazať"/>';
 		$(this).before(filter);
 		$(this).tablesorterFilter({filterContainer: "#"+boxName,
                             filterClearContainer: "#"+clearName});
