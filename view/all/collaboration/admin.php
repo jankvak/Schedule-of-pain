@@ -27,8 +27,8 @@
                         $name = $role['role'];
                         echo '<option value="' . $role['id'] . '"';
                         if ($collaboration_roles[$collaboration_user['id']] == $role['id'])
-                            echo ' selected="selected">';
-                        echo $name . '</option>';
+                            echo ' selected="selected"';
+                        echo '>' . $name . '</option>';
                     }
                     echo '</select></td>';
                     echo '<td align="center"><input type="checkbox" name="existing_user[' . $i . '][action][remove]"/></td></tr>';
@@ -62,8 +62,8 @@
                     $name = $role['role'];
                     echo '<option value="' . $role['id'] . '"';
                     if (2 == $role['id'])
-                        echo ' selected="selected">';
-                    echo $name . '</option>';
+                        echo ' selected="selected"';
+                    echo '>' . $name . '</option>';
                 }
                 echo '</select></td>';
                 echo '<td align="center"><input type="checkbox" name="new_user[' . $i . '][action][add]"/></td></tr>';
