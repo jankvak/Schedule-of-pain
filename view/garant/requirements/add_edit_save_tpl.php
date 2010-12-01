@@ -2,8 +2,8 @@
 <div class="row">
         <?php 
             require_once "view/helpers/preberanie.php";
-			if (!isset($requirements["skratka"]) || $requirements["skratka"]=="" ||
-                    $requirements["pred_hod"]=="" || $requirements["cvic_hod"]=="")
+			if (!isset($requirements["abbreviation"]) || $requirements["abbreviation"]=="" ||
+                    $requirements["lecture_hours"]=="" || $requirements["lecture_hours"]=="")
                    zobrazMinulorocnePredmety($minule, $predmet, "garant/requirements/copy/{$course_id}", $blokovanie_preberania);
         ?>
 </div>
@@ -11,7 +11,7 @@
     <input type="hidden" name="id" value="<?php echo $predmet['id']; ?>"/>
         <p>
         	<label for="skratka">Skratka predmetu:</label>
-            <input type="text" size="5" style="width: 200px;" id="skratka" name="skratka" value="<?php echo $requirements["skratka"];?>" />
+            <input type="text" size="5" style="width: 200px;" id="skratka" name="skratka" value="<?php echo $requirements["abbreviation"];?>" />
         </p>
         <p>
             <label for="prednasajuci">Prednášajúci:</label>
@@ -19,7 +19,7 @@
                             <?php
                             echo "<option value='0'>--nie je--</option>";
                             foreach ($lecturers as $lecturer) {
-                                $name = $lecturer['priezvisko']." ".$lecturer['meno'].", ".$lecturer['tituly_pred']." ".$lecturer['tituly_za'];
+                                $name = $lecturer['last_name']." ".$lecturer['name'].", ".$lecturer['titles_before']." ".$lecturer['titles_after'];
 								$selected = $lecturer["id"] == $requirements["prednasajuci"] ? " selected=\"selected\"" : "";
                                 echo "<option value='{$lecturer['id']}'{$selected}>{$name}</option>";
                             }
@@ -32,7 +32,7 @@
                             <?php
                             echo "<option value='0'>--nie je--</option>";
                             foreach ($teachers as $teacher) {
-                                $name = $teacher['priezvisko']." ".$teacher['meno'].", ".$teacher['tituly_pred']." ".$teacher['tituly_za'];
+                                $name = $teacher['last_name']." ".$teacher['name'].", ".$teacher['titles_before']." ".$teacher['titles_after'];
 								$selected = $teacher["id"] == $requirements["cviciaci"] ? " selected=\"selected\"" : "";
                                 echo "<option value='{$teacher['id']}'{$selected}>{$name}</option>";
                             }
@@ -41,11 +41,11 @@
         </p>
         <p>
         	<label for="pred_hod">Rozsah prednášok:</label>
-            <input size="5" type="text" id="pred_hod" name="pred_hod" value="<?php echo $requirements["pred_hod"]; ?>"/> hodiny/týždeň;
+            <input size="5" type="text" id="pred_hod" name="pred_hod" value="<?php echo $requirements["lecture_hours"]; ?>"/> hodiny/týždeň;
         </p>
         <p>
         	<label for="cvic_hod">Rozsah cvičení:</label>
-            <input size="5" type="text" id="cvic_hod" name="cvic_hod" value="<?php echo $requirements["cvic_hod"]; ?>"/> hodiny/týždeň;
+            <input size="5" type="text" id="cvic_hod" name="cvic_hod" value="<?php echo $requirements["exercise_hours"]; ?>"/> hodiny/týždeň;
         </p>
     <p>
         <?php

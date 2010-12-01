@@ -157,11 +157,15 @@ class Collection extends Model
     public function isActiveRozvrhovaAkcia($semesterID)
     {
         $sql =
-            "SELECT id FROM rozvrhova_akcia
-			 WHERE zaciatok<=CURRENT_TIMESTAMP AND CURRENT_TIMESTAMP<=koniec
-			 AND id_semester=$1";
+            "SELECT event.id
+             FROM   event JOIN event_time_event e2t ON event.id = e2t.id_event
+                          JOIN time_event ON e2t.id_time_event = time_event.id
+             WHERE  event.id_semester = $1
+                AND time_event.start < CURRENT_TIMESTAMP
+                AND (CURRENT_TIMESTAMP - time_event.end)/time_event.recur_count < time_event.recur_freq * INTERVAL '1 DAY'";
         $this->dbh->query($sql, $semesterID);
-
+        //TODO:: my zatial nepouzivame rozvrhove akcie, treba doplnit.
+        return true;
         return $this->dbh->RowCount() > 0;
     }
 

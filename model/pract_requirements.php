@@ -80,15 +80,9 @@ class PractRequirements extends Model
 
     private function __nacitajTypy()
     {
-        $sql = "SELECT 2";//id FROM poziadavka_typ WHERE nazov='cvicenie'";
-        $this->dbh->Query($sql);
-        $res = $this->dbh->fetch_assoc();
-        $this->typ_poziadavky = $res["id"];
+        $this->typ_poziadavky = 2; //cvicenie
 
-        $sql = "SELECT 5";//id FROM skupina WHERE code='Pract'";
-        $this->dbh->Query($sql);
-        $res = $this->dbh->fetch_assoc();
-        $this->typ_role = $res["id"];
+        $this->typ_role = 5; //cvicenie
     }
 
     //***************************************SAVE*****************************************************

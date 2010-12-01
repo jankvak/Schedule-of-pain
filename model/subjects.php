@@ -178,7 +178,7 @@ class Subjects extends Model {
     public static function getSubjectInfo($id_predmet) {
         $dbh = Connection::get();
 
-        $query = "SELECT name AS nazov, code AS kod FROM subject WHERE id = $1";
+        $query = "SELECT name AS nazov, code AS kod FROM course WHERE id = $1";
 
         $dbh->query($query, array($id_predmet));
         if ($dbh->RowCount()>0)
