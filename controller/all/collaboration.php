@@ -41,7 +41,7 @@ class CollaborationController extends AppController {
         $this->set('collaboration_id', $collaboration_id);
     }
 
-    function collaborationAdmin($collaboration_id) {
+    function admin($collaboration_id) {
         if (!$this->isCollaborationAdmin($collaboration_id)) {
             $this->redirect("all/collaboration/collaboration/{$collaboration_id}");
         } else {
@@ -60,7 +60,7 @@ class CollaborationController extends AppController {
         }
     }
 
-    function collaborationMembers($collaboration_id) {
+    function members($collaboration_id) {
         $collaboration_users = $this->collaboration->getCollaborationUsers($collaboration_id);
         $collaboration_info = $this->collaboration->getCollaborationInfo($collaboration_id);
         $roles = $this->collaboration->getRoles();
@@ -73,7 +73,7 @@ class CollaborationController extends AppController {
         $this->set('current_user_id', $this->session->read("uid"));
     }
 
-    function addMessage($collaboration_id) {
+    function message($collaboration_id) {
         $collaboration_info = $this->collaboration->getCollaborationInfo($collaboration_id);
         $this->set('collaboration_info', $collaboration_info);
         $this->set('collaboration_id', $collaboration_id);
@@ -89,10 +89,10 @@ class CollaborationController extends AppController {
 
     function getCollaborationMenu($collaboration_id) {
         $collaboration_menu[0]['text'] = 'Zoznam členov';
-        $collaboration_menu[0]['action'] = 'all/collaboration/collaborationMembers/' . $collaboration_id . '/';
+        $collaboration_menu[0]['action'] = 'all/collaboration/members/' . $collaboration_id . '/';
         if ($this->isCollaborationAdmin($collaboration_id)) {
             $collaboration_menu[1]['text'] = 'Správa členov';
-            $collaboration_menu[1]['action'] = 'all/collaboration/collaborationAdmin/' . $collaboration_id . '/';
+            $collaboration_menu[1]['action'] = 'all/collaboration/admin/' . $collaboration_id . '/';
         }
         return $collaboration_menu;
     }
@@ -130,7 +130,7 @@ class CollaborationController extends AppController {
                     $this->collaboration->addUser($collaboration_id, $new_collaboration_user['id_person'], $new_collaboration_user['id_role']);
                 }
             }
-            $this->redirect("all/collaboration/collaborationAdmin/{$collaboration_id}");
+            $this->redirect("all/collaboration/admin/{$collaboration_id}");
         }
     }
 

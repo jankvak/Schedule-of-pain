@@ -8,7 +8,7 @@ foreach ($collaboration_menu as $collaboration_menu_item) {
 ?>
 <br/><br/>
 <h6>Príspevky:</h6>
-<p><a href="all/collaboration/addMessage/<?php echo $collaboration_id; ?>/">Nový príspevok</a></p><br/>
+<p><a href="all/collaboration/message/<?php echo $collaboration_id; ?>/">Nový príspevok</a></p><br/>
 <table class="sorted-table paged-table filtered {sortlist: [[1,1]], pagesizes:[10,25,50], selpagesize: 0}">
     <thead>
         <tr>
