@@ -72,9 +72,8 @@ class GarantRequirements extends Model {
 
         // zmaze starsich vyucujucich
         $queryy =
-            "DELETE FROM vyucuje_predmet WHERE id_predmet = $1
-			 AND id_pedagog_typ IN (SELECT s.id FROM skupina s 
-			 WHERE s.code ='Lecturer' OR s.code='Pract')";
+            "DELETE FROM person_course WHERE id_course = $1
+			 AND id_group IN (3,4)";//Lecturer, Pract
         $this->dbh->query($queryy, $this->id);
         ////////
 
@@ -83,8 +82,8 @@ class GarantRequirements extends Model {
         // ak bol prednasajuci nastaveny na "--nie je--" tak to nebudeme ukladat do DB (vymazany je vyssie)
         if ($this->prednasajuci != 0) {
             $query2 =
-                "INSERT INTO vyucuje_predmet(id_predmet,id_pedagog,id_pedagog_typ)
-				 VALUES($1, $2, (SELECT s.id FROM skupina s WHERE s.code ='Lecturer'))";
+                "INSERT INTO person_course(id_course,id_person,id_group)
+				 VALUES($1, $2, 3)";//3 => Lecturer
             $this->dbh->query($query2, array(
                 $this->id, $this->prednasajuci
             ));
@@ -93,8 +92,8 @@ class GarantRequirements extends Model {
         // ak bol cviciaci nastaveny na "--nie je--" tak to nebudeme ukladat do DB (vymazany je vyssie)
         if ($this->cviciaci != 0) {
             $query3 =
-                "INSERT INTO vyucuje_predmet(id_predmet,id_pedagog,id_pedagog_typ)
-				 VALUES($1, $2, (SELECT s.id FROM skupina s WHERE s.code ='Pract'))";
+                "INSERT INTO person_course(id_course,id_person,id_group)
+				 VALUES($1, $2, 4)";//4 => Exerciser
             $this->dbh->query($query3, array(
                 $this->id, $this->cviciaci
             ));
@@ -106,8 +105,9 @@ class GarantRequirements extends Model {
     // vrati poziadavky pre dany predmet
     function get($id) {
         $query =
-            "SELECT id, nazov FROM predmet
-			 WHERE id = $1";
+            "SELECT id, name AS nazov
+             FROM   course
+             WHERE  id = $1";
 
         $this->dbh->query($query, $id);
         return $this->dbh->fetch_assoc();
@@ -117,23 +117,24 @@ class GarantRequirements extends Model {
     function getReqData($id_predmet) {
     // ziska info o predmete, bude vzdy
         $sql =
-            "SELECT p.pred_hod, p.cvic_hod, p.skratka FROM predmet p
-             WHERE p.id=$1";
+            "SELECT lecture_hours, exercise_hours, abbreviation
+             FROM   course
+             WHERE  id=$1";
         $this->dbh->query($sql, $id_predmet);
         $res = $this->dbh->fetch_assoc();
         // doplni vyucujucich
         $sql =
-            "SELECT vp.id_pedagog, s.code FROM vyucuje_predmet vp
-             JOIN skupina s ON s.id=vp.id_pedagog_typ
-             WHERE id_predmet=$1 AND s.code <> 'Garant'";
+            "SELECT p2c.id_person AS id_pedagog, p2c.id_group
+             FROM   person_course p2c
+             WHERE  p2c.id_course=$1 AND p2c.id_group IN (2,3,4)"; //'Garant'";
         $this->dbh->query($sql, $id_predmet);
         $vyucuju = $this->dbh->fetchall_assoc();
 
         // ak nie su zadani vyucujuci, tak bude aj tak prazdne pole
         foreach ($vyucuju as $vyucuje) {
-            switch ($vyucuje["code"]) {
-                case "Pract": $res["cviciaci"] = $vyucuje["id_pedagog"]; break;
-                case "Lecturer": $res["prednasajuci"] = $vyucuje["id_pedagog"]; break;
+            switch ($vyucuje["id_group"]) {
+                case 4: $res["cviciaci"] = $vyucuje["id_pedagog"]; break;
+                case 3: $res["prednasajuci"] = $vyucuje["id_pedagog"]; break;
             }
         }
         return $res;
@@ -195,11 +196,11 @@ class GarantRequirements extends Model {
      */
     private function __updateCourse() {
         $query =
-            "UPDATE predmet
-             SET skratka = $1,
-		 	 pred_hod = $2,
-		 	 cvic_hod = $3
-             WHERE id = $4";
+            "UPDATE course
+             SET    abbreviation = $1,
+                    lecture_hours = $2,
+		    exercise_hours = $3
+             WHERE  id = $4";
         $this->dbh->query($query, array(
             $this->skratka, $this->pred_hod, $this->cvic_hod, $this->id
         ));
