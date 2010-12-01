@@ -1,4 +1,4 @@
-INSERT INTO menu
+﻿INSERT INTO menu
 (
   id_group,
   name,
@@ -8,7 +8,7 @@ INSERT INTO menu
 VALUES
 (
   7,
-  'Kolabor�cia',
+  'Kolaborácia',
   19,
   'all/collaboration/index'
 )
