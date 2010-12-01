@@ -1,5 +1,6 @@
 ﻿INSERT INTO menu
 (
+  id,
   id_group,
   name,
   "order",
@@ -7,6 +8,7 @@
 )
 VALUES
 (
+  25,
   7,
   'Kolaborácia',
   19,
