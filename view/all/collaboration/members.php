@@ -18,7 +18,8 @@
             echo '<td>' . $collaboration_user['meno'] . '</td>';
             echo '<td>';
             foreach ($roles as $role) {
-                if ($collaboration_roles[$collaboration_user['id']] == $role['id']) $str .= $role['role'];
+                if ($collaboration_roles[$collaboration_user['id']] == $role['id'])
+                    echo $role['role'];
             }
             echo '</td>';
             echo '</tr>';
