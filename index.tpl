@@ -21,12 +21,16 @@
 	<link rel="stylesheet" type="text/css" href="css/priority_layout.css" media="screen" />
 	<link rel="stylesheet" type="text/css" href="css/jquery.tablesorter.css" media="screen"/>
 	<link rel="stylesheet" type="text/css" href="css/jquery.tablesorter.pager.css" media="screen"/>
-  <link rel="stylesheet" type="text/css" href="css/fullcalendar.css" media="screen"/>
-  <link rel='stylesheet' type='text/css' href='css/redmond/theme.css' media="screen"/>
+        <link rel="stylesheet" type="text/css" href="css/jquery-ui-1.8.4.custom.css">
+        <link rel="stylesheet" type="text/css" href="css/ui.dropdownchecklist.themeroller.css">
+        <link rel="stylesheet" type="text/css" href="css/fullcalendar.css" media="screen"/>
+        <link rel='stylesheet' type='text/css' href='css/redmond/theme.css' media="screen"/>
   
 
 	<script type="text/javascript" src="js/jquery.js"></script>
 	<script type="text/javascript" src="js/jquery-plugins/jquery.ui.custom.min.js"></script>
+        <script type="text/javascript" src="js/jquery-plugins/jquery-1.4.2.min.js"></script>
+        <script type="text/javascript" src="js/jquery-plugins/jquery-ui-1.8.4.custom.min.js"></script>
 	<script type="text/javascript" src="js/jquery-plugins/autocomplete.js"></script>
 	<script type="text/javascript" src="js/delete-guardian.js"></script>
 	<script type="text/javascript" src="js/jquery-plugins/jquery.tablesorter.js"></script>
@@ -47,6 +51,19 @@
 			$("input:first").focus();
 		});
 	</script>
+
+
+    <!-- Include the DropDownCheckList supoprt -->
+    <script type="text/javascript" src="js/jquery-plugins/ui.dropdownchecklist-1.1-min.js"></script>
+
+    <!-- Apply dropdown check list to the selected items -->
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $("#s1").dropdownchecklist();
+
+        });
+    </script>
+
 </head>
 <body>
 
