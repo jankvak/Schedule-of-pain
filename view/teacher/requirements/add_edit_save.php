@@ -6,6 +6,7 @@
 <script type="text/javascript" src="js/room_capacity.js"></script>
 <script type="text/javascript" src="js/rem_room.js"></script>
 <script type="text/javascript" src="js/checkbox.js"></script>
+
 <script type="text/javascript">
 //<![CDATA[
 <?php
@@ -50,6 +51,7 @@ echo "}";
 ?>
 //]]>
 </script>
+
 <?php
 
 define("LECTURE_COUNT", 3);
