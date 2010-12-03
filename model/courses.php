@@ -208,12 +208,8 @@ class Courses extends Model {
              FROM   person_course
              WHERE  person_course.id_course = $1
                 AND person_course.id_person = $2
-                AND CASE person_course.role_type
-                        WHEN 'G' THEN 5
-                        WHEN 'L' THEN 4
-                        WHEN 'E' THEN 3
-                    END >= $3
-                AND person_course.role_type IN ('E','L','G')";
+                AND person_course.id_group <= $3
+                AND person_course.id_group IN (2,3,4)";
         $this->dbh->query($sql, array($predmet_id, $pedagog_id, $roleID));
         return $this->dbh->RowCount() > 0;
     }
