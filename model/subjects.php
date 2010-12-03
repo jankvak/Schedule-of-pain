@@ -192,7 +192,7 @@ class Subjects extends Model {
 
     // vrati pocet studentov zapisanych na dany predmet
     public function getStudentCount($id_predmet) {
-        $query = "SELECT count(id) as count from person_course where id_predmet = $1 AND id_group = '8'";
+        $query = "SELECT count(id) as count from person_course where id_course = $1 AND id_group = '8'";
         $this->dbh->query($query, array($id_predmet));
         return $this->dbh->fetch_assoc();
     }
@@ -201,13 +201,13 @@ class Subjects extends Model {
     // nie je potrebne filtrovat aj podla semestra, lebo predmet ako taky
     // je specificky pre kazdy semester (kazdy semester ma ine id)
         $query =
-            "SELECT person.grade AS rocnik, study_programme.name AS nazov, COUNT(1) AS student_count
+            "SELECT person.grade AS rocnik, sp.name AS nazov, COUNT(1) AS student_count
              FROM   person JOIN person_study_programme p2sp ON person.id = p2sp.id_person
                            JOIN study_programme sp ON p2sp.id_study_programme = sp.id
                            JOIN person_course p2c ON person.id = p2c.id_person
              WHERE  p2c.id_course = $1
-             GROUP BY study_programme.id, person.grade, study_programme.name
-             ORDER BY study_programme.id";
+             GROUP BY sp.id, person.grade, sp.name
+             ORDER BY sp.id";
         $this->dbh->query($query, array($id_predmet));
         return $this->dbh->fetchall_assoc();
     }
