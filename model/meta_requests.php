@@ -24,14 +24,25 @@ class MetaRequests extends Model
     public function loadMetaRequest($metaPoziadavkaID)
     {
         $sql =
-            "SELECT mp.id_predmet, mp.id_osoba, mp.id_poziadavka_typ,
+            "SELECT course.id AS id_predmet,
+                    person.id AS id_osoba,
+                    event.event_type AS id_poziadavka_typ,
+                    course.name AS predmet_nazov, ".
+                    DateConvert::DBTimestampToSkDateTime("request.timestamp")." AS cas_pridania, ".
+                    Users::vyskladajMeno("person", "pedagog", false). ", ".
+             "      request.description AS komentar
+             FROM  request JOIN event ON request.id_event = event.id
+                            JOIN course ON event.id_course = course.id
+                            JOIN person ON request.id_person = person.id
+             WHERE  request.id = $1";
+            /*"SELECT mp.id_predmet, mp.id_osoba, mp.id_poziadavka_typ,
 			        pr.nazov as predmet_nazov, ".
             DateConvert::DBTimestampToSkDateTime("mp.cas_pridania")." AS cas_pridania, ".
             Users::vyskladajMeno("p", "pedagog", false).
             "FROM meta_poziadavka mp
         	 JOIN pedagog p ON p.id=mp.id_osoba
         	 JOIN predmet pr ON pr.id=mp.id_predmet
-			 WHERE mp.id=$1";
+			 WHERE mp.id=$1";*/
         $this->dbh->query($sql, $metaPoziadavkaID);
 
         // urcite sa vrati iba jeden zaznam lebo sa hlada podla id
