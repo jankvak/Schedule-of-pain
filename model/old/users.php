@@ -198,12 +198,12 @@ class Users extends Model {
     {
         if ($specPoradie)
         {
-            $res = "{$skratka}.priezvisko || ' ' || {$skratka}.meno || ', ' ||
-                {$skratka}.tituly_pred || ' ' || {$skratka}.tituly_za";
+            $res = "{$skratka}.last_name || ' ' || {$skratka}.name || ', ' ||
+                {$skratka}.titles_before || ' ' || {$skratka}.titles_after";
         }else
         {
-            $res = "{$skratka}.tituly_pred || ' ' || {$skratka}.meno || ' ' ||
-                {$skratka}.priezvisko || ', ' || {$skratka}.tituly_za";
+            $res = "{$skratka}.titles_before || ' ' || {$skratka}.name || ' ' ||
+                {$skratka}.last_name || ', ' || {$skratka}.titles_after";
         }
         // maly trik, ak nema obidva tituly aby neboli medzery na koncoch tak otrimujeme
         // (aj ciarku ked nema tituly)
