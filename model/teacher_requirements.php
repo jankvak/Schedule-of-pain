@@ -25,6 +25,9 @@ class TeacherRequirements extends Model
     // referencia na model metapoziadavok
     private $metaRequests;
 
+    //to assign a request to actual semester
+    private $periods;
+
     // tak manulne to sem zadavat ako magor nebudem ...
     // konstruktor nageneruje poziadavky pre requirements dynamicky
     public $check = array(
@@ -38,6 +41,7 @@ class TeacherRequirements extends Model
     public function __construct() {
     //init DB connectu
         parent::__construct();
+        $this->periods = new Periods();
         // naplnenie requirements, treba zobrat referenciu aby neskopirovalo
         $ch = &$this->check["requirement"]["array"];
         for ($rozl=1;$rozl<=MAX_ROZLOZENI;$rozl++) {
@@ -94,7 +98,7 @@ class TeacherRequirements extends Model
     // uloz poziadavky
     public function save($id_person, $lock)
     {
-        $this->dbh->TransactionBegin();
+        /*$this->dbh->TransactionBegin();
 
         if ($this->metaRequests->existsNewMetaRequest($this->course_id, $this->typ_poziadavky, $lock))
         {
@@ -102,34 +106,52 @@ class TeacherRequirements extends Model
             $this->dbh->TransactionRollback();
             // vyhod exception aby user vedel ze sa stranka modifikovala
             throw new RequestModified();
-        }
+        }*/
 
         // najprv uloz metapoziadavku
         $sql =
-            "INSERT INTO meta_poziadavka (id_predmet, id_osoba, id_poziadavka_typ, cas_pridania)
-        	 VALUES($1, $2, $3, now())";
-
+            "INSERT INTO event(id_semester, id_course, event_type, confirmed)
+                    VALUES ($1,$2,$3,false)";
+        //    "INSERT INTO meta_poziadavka (id_predmet, id_osoba, id_poziadavka_typ, cas_pridania)
+        //	 VALUES($1, $2, $3, now())";
         $this->dbh->query($sql, array(
+
+            $this->periods->getLastSemesterID(),
+            $this->course_id,
+            $this->typ_poziadavky
+        ));
+
+        $id_event = $this->dbh->GetLastInsertID();
+
+        $sql =
+            "INSERT INTO request(id_person, id_event, description)
+                    VALUES ($1, $2, $3)";
+        $this->dbh->query($sql, array(
+            $id_person, $id_event, $this->requirement['komentare']['vseobecne']
+        ));
+
+        /*$this->dbh->query($sql, array(
             $this->course_id, $id_person, $this->typ_poziadavky
         ));
         $metaPoziadavkaID = $this->dbh->GetLastInsertID();
+        */
 
         // uloz komentare (posledny parameter
-        Comments::saveComment($metaPoziadavkaID, $this->requirement['komentare']['vseobecne'],1,$id_person);
-        Comments::saveComment($metaPoziadavkaID, $this->requirement['komentare']['sw'],2,$id_person);
+        //Comments::saveComment($metaPoziadavkaID, $this->requirement['komentare']['vseobecne'],1,$id_person);
+        //Comments::saveComment($metaPoziadavkaID, $this->requirement['komentare']['sw'],2,$id_person);
 
         // update komentarov k diskusii, tak aby boli naviazane na najnovsiu poziadavku
         // update vykonat, len ak sme prave nepreberali poziadavku z minuleho roka  ( vtedy by bolo $this->poziadavka_prebrata == 1)
-        if (!$this->poziadavka_prebrata) {
+        /*if (!$this->poziadavka_prebrata) {
             Comments::updateComments($metaPoziadavkaID, $this->previousMetaID);
-        }
+        }*/
 
         // nasledne uloz rozlozenia
-        foreach($this->requirement["layouts"] as $layout)
+        /*foreach($this->requirement["layouts"] as $layout)
         {
             $this->__saveLayout($layout, $id_person, $metaPoziadavkaID);
-        }
-        $this->dbh->TransactionEnd();
+        }*/
+        //$this->dbh->TransactionEnd();
     }
 
     private function __saveLayout($layout, $id_person, $metaPoziadavkaID) {
@@ -239,8 +261,8 @@ class TeacherRequirements extends Model
         // ziskanie metapoziadavky
         $res["meta_poziadavka"] = $this->metaRequests->loadMetaRequest($metaPoziadavkaID);
         // ziskanie komentarov
-        $res["requirement"]["komentare"] = $this->__loadComments($metaPoziadavkaID);
-        $res["requirement"]["layouts"] 	= $this->__loadLayouts($metaPoziadavkaID);
+        $res["requirement"]["komentare"] = $res["meta_poziadavka"]["komentar"];//$this->__loadComments($metaPoziadavkaID);
+        //TODO:rozlozenie:$res["requirement"]["layouts"] 	= $this->__loadLayouts($metaPoziadavkaID);
 
         return $res;
     }
