@@ -26,6 +26,7 @@ height: 30px;
 margin: 1px;
 float: left;
 line-height: 200%;
+
 }
 
 .col_top{
@@ -61,3 +62,45 @@ margin: 1px;
 float: left;
 line-height: 200%;
 }
+
+#carousel
+{
+	position:absolute; 
+	height:100px;  
+	margin-left:85px; 
+	margin-top:0px;
+}
+
+.predmet
+{
+	margin-left:10px; 
+	margin-top:10px; 
+	margin-right:10px; 
+	margin-bottom:10px; 
+	width:80px; 
+	height:80px; 
+	background-color:blue;
+}
+
+.prevb
+{
+	position:absolute; 
+	width:30px; 
+	height:100px; 
+	margin-left:-320px; 
+	margin-top:0px; 
+	border:0px; 
+	background-color:transparent;
+}
+
+.nextb
+{
+	position:absolute; 
+	width:30px; 
+	height:100px; 
+	margin-left:290px; 
+	margin-top:0px; 
+	border:0px; 
+	background-color:transparent; 
+}
+
