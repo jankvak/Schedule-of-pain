@@ -1,12 +1,6 @@
 
 <h2>Vyberte predmet, ktorého požiadavky chcete zadať</h2>
 
-<select id="s1" multiple="multiple">
-    <option>Low</option>
-    <option>Medium</option>
-    <option>High</option>
-    <option>best</option>
-</select>
 <?php
 // split poziadaviek do zadanych a nezadanych
 $zadane = $nezadane = array();

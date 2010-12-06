@@ -56,6 +56,11 @@ class Equipment extends Model {
         $this->dbh->query($query, array($id));
         return $this->dbh->fetch_assoc();
     }
+    function getAllTypes() {
+        $query = "SELECT distinct type FROM equipment";
+        $this->dbh->query($query);
+        return $this->dbh->fetchall_assoc();
+    }
 
     // uloz nove vybavenie
     function save() {

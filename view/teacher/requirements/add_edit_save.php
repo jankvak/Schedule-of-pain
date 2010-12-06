@@ -67,7 +67,7 @@ function hasAttr($p, $attr) {
     return $p ? "$attr='$attr'" : "";
 }
 
-function reqhtml($id_requirement, $id_layout, $capacities, $roomsByName, $prednaska, &$req, $student_count, $poziadavka_prebrata) {
+function reqhtml($id_requirement, $id_layout, $capacities, $roomsByName, $prednaska, &$req, $student_count, $poziadavka_prebrata,$equips) {
     $id = $id_requirement . $id_layout;
     $display = ($prednaska == 1 || $req) ? "block" : "none";
     // len ak mame data nebude disabled
@@ -128,20 +128,17 @@ function reqhtml($id_requirement, $id_layout, $capacities, $roomsByName, $predna
 						<div class="left_side">Stoličky navyše: <input size="5" value="' . $chair_count . '" name="requirement[layouts][' . $id_layout . '][requirement][' . $id_requirement . '][equipment][chair_count]" ' . $disabledReq . '/></div>
 						<div class="right_side" style="width: 100px;"><input type="checkbox" style="margin-left: 0px;" name="requirement[layouts][' . $id_layout . '][requirement][' . $id_requirement . '][equipment][beamer]" ' . $disabledReq . ' ' . $beamer . '/> projektor</div>
 					</div>
-                                        
                                         <div class="row" style="width: 400px;">
-						<div class="right_side">
-                                                Vybavenie<br/>
-                                                <div class="left_side">
-                                                <select id="s2" multiple="multiple">
-                                                   <option>Notebook</option>
-                                                   <option>Projektor</option>
-                                                   <option>Meotar</option>
-                                                   <option>Radiator</option>
-                                                </select>
+						<div class="left_side">Vybavenie:</div>
+						<div class="right_side" style="width: 100px;">
+                                                <select id="s2" multiple="multiple">';
+                                        foreach ($equips as $eq) {
+                                                    $html .= '<option>' . $eq["type"] . '</option>';
+                                        }
+                                               $html .= '  </select>
                                                 </div>
-
 					</div>
+                                       
                     <div class="row" style="width: 400px;">
 						<div class="left_side">Kapacita miestnosti:</div>
 						<div class="right_side" style="width: 100px;">
@@ -185,7 +182,7 @@ function reqhtml($id_requirement, $id_layout, $capacities, $roomsByName, $predna
     return $html;
 }
 
-function generateLayoutHtml($number, $name, $capacities, $roomsByName, &$requirements, $student_count, $poziadavka_prebrata) {
+function generateLayoutHtml($number, $name, $capacities, $roomsByName, &$requirements, $student_count, $poziadavka_prebrata,$equips) {
     $disabledLayout = hasAttr($number > 0 && !$requirements, "disabled");
     echo "<div class='part $name color1' ";
     if ($number == 0)
@@ -258,7 +255,7 @@ function generateLayoutHtml($number, $name, $capacities, $roomsByName, &$require
 					  </div>";
     for ($i = 1; $i <= 3; $i++) {
 
-        echo reqhtml("$i", "$name", $capacities, $roomsByName, "$i", $requirements["requirement"][$i], $student_count, $poziadavka_prebrata);
+        echo reqhtml("$i", "$name", $capacities, $roomsByName, "$i", $requirements["requirement"][$i], $student_count, $poziadavka_prebrata,$equips);
     }
     echo "</div>";
 }
@@ -330,9 +327,9 @@ if (!isset($requirement))
     <div id="mainForm">
         <?php
                 fb($requirement, "requirement");
-                generateLayoutHtml(0, "a", $capacities, $roomsByName, $requirement["layouts"]["a"], $student_count, $poziadavka_prebrata);
-                generateLayoutHtml(1, "b", $capacities, $roomsByName, $requirement["layouts"]["b"], $student_count, $poziadavka_prebrata);
-                generateLayoutHtml(2, "c", $capacities, $roomsByName, $requirement["layouts"]["c"], $student_count, $poziadavka_prebrata);
+                generateLayoutHtml(0, "a", $capacities, $roomsByName, $requirement["layouts"]["a"], $student_count, $poziadavka_prebrata,$equips);
+                generateLayoutHtml(1, "b", $capacities, $roomsByName, $requirement["layouts"]["b"], $student_count, $poziadavka_prebrata,$equips);
+                generateLayoutHtml(2, "c", $capacities, $roomsByName, $requirement["layouts"]["c"], $student_count, $poziadavka_prebrata,$equips);
         ?>
             </div>
         </form>
