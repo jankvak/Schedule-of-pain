@@ -1,4 +1,43 @@
 <script type="text/javascript" src="js/set_priority.js"></script>
+<script type="text/javascript" src="js/jquery-plugins/jquery-ui.min.js"></script>
+<script type="text/javascript" src="js/jquery-plugins/jcarousellite.min.js"></script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){
+
+	$("#carousel").jCarouselLite({
+		btnNext: ".nextb",
+		btnPrev: ".prevb",
+		visible: 5,
+		circular:true
+	});
+	
+	
+	$( ".predmet" ).draggable({  
+		tolerance:"pointer" ,
+		snapMode: "inner",
+		helper: "clone",
+		appendTo: "body"
+		});
+	
+	$(".editable").droppable({
+      drop: function(ev, ui) { 
+		$(this).html(ui.draggable.attr("id"));
+		
+	  }
+    });
+	
+	$("button.prevb").click(function(){
+	
+	});
+
+	$("button.nextb").click(function(){
+	
+	});
+
+});
+</script>
 
 <?php $raster=array(array(),array(),array(),array(),array());
 $defColor;
@@ -151,13 +190,34 @@ echo '<p><a href="all/priorities/getPrevPriorities">Prebrať osobné časové pr
 				<div id="sel_b" class="col color_b" style="width: 150px;">OK</div>
 				<div id="sel_c" class="col color_c" style="width: 150px;">Nevyhovujúce</div>
 			</div>
-			<div>
+			<div  class="color5 commentNote" style="position: absolute; width:670px; height:100px;  margin-top:33px;" >
+			
+			<button class="prevb" > <img src="images/prev.png" ></img></button>
+			<button class="nextb" > <img src="images/next.png" ></img> </button>	
+			
+			<div id="carousel"  >
+				<ul >
+					<li style="width:100px; height:100px;" ><div class="predmet" id="1" >predmet1</div></li>
+					
+					<li style="width:100px; height:100px;" ><div> </div></li>
+					<li style="width:100px; height:100px;" ><div> </div></li>
+					<li style="width:100px; height:100px;" ><div> </div></li>
+					<li style="width:100px; height:100px;" ><div> </div></li>
+					<li style="width:100px; height:100px;" ><div> </div></li>
+					<li style="width:100px; height:100px;" ><div> </div></li>
+					
+											
+				</ul>
+            </div>
+			
+			</div>
+			<div style="position: absolute; margin-top:144px;">
                 <div class="color5 commentNote" style="width: 212px;">Komentár:</div>
                 <div class="color5 commentNote" style="width: 455px;">
                     <textarea style="height:62px;" name="comment" rows="3" cols="50"><?php echo $comment; ?></textarea>
                 </div>
 			</div>
-			<div>
+			<div class="color5 commentNote" style="position: absolute; width:670px; height:30px; margin-top:227px;">
              <?php
             if($read_only_semester != true)
                 echo "<input type='submit' value='Ulož'/>";

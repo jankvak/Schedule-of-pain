@@ -22,7 +22,7 @@
 		{CONTENT}		
 	</div>
 	<div id="footer">
-		Vytvoril tím <a href="http://labss2.fiit.stuba.sk/TeamProject/2009/team19is-si/" target="_blank">BugHunters</a> 2009-2010 {SVN_VERSION}
+		Vytvoril tím <a href="http://labss2.fiit.stuba.sk/TeamProject/2010/team07is-si/" target="_blank">Schedule of Pain</a> 2010-2011
 	</div>
 </body>
 </html>
