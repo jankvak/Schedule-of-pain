@@ -55,7 +55,7 @@ if (empty($courses)) {
         ?>
             <tr>
                 <td width="30%"><?php echo $course['nazov'] ?></td>
-                <td width="50%" align="center"><?php echo "{$course["meta_poziadavka"]["pedagog"]} o {$course["meta_poziadavka"]["cas_pridania"]}"; ?></td>
+                <td width="50%" align="center"><?php echo "{$course["meta_poziadavka"]["pedagog"]} {$course["meta_poziadavka"]["cas_pridania"]}"; ?></td>
                 <td width="10%" align="center">
                     <a href="teacher/requirements/edit/<?php echo $course["id"]; ?>"><?php echo $read_only_semester == true ? "prezerať" : "upraviť" ?></a><br/>
                 </td>
