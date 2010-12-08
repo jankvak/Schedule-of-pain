@@ -66,6 +66,10 @@ foreach( $priorities as $priority)
 
 ?>
 <h2>Osobné časové priority</h2>
+<?php
+foreach( $courses as $cours)
+            echo $cours['nazov'];
+?>
 <?php if($read_only_semester != true)
 echo '<p><a href="all/priorities/getPrevPriorities">Prebrať osobné časové priority z minulého roka</a></p><br />';
 ?>
@@ -226,6 +230,8 @@ echo '<p><a href="all/priorities/getPrevPriorities">Prebrať osobné časové pr
 		</div>
 	</div>
 <?php
+        foreach( $courses as $cours)
+            echo $cours['name'];
 	foreach( $priorities as $priority) 
 	{
     	for($i=$priority['start'];$i<=$priority['end'];$i++) 

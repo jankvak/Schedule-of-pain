@@ -115,7 +115,28 @@ class Courses extends Model {
         }
         return $resultPredmety;
     }
-
+public function getForUserCourse($userID, $semester) {
+    // extra stlpce berie kvoli gerantovi aby mal vsetky potrebne udaje pre rozhodnutie ci boli zadane poziadavky
+        $query =
+            "SELECT course.id,
+                    course.name AS nazov,
+                    course.abbreviation AS skratka,
+                    course.lecture_hours AS pred_hod,
+                    course.exercise_hours cvic_hod,
+                    p2c.id_group AS id_pedagog_typ
+             FROM   person_course p2c JOIN course ON p2c.id_course = course.id
+             WHERE  p2c.id_person=$1
+                AND EXISTS (
+                        SELECT 1
+                        FROM   course_semester c2s
+                        WHERE  c2s.id_course = course.id
+                           AND c2s.id_semester=$2)
+             ORDER BY course.name";
+        //vp.id_pedagog_typ=$1 AND
+        $this->dbh->query($query, array($userID, $semester));
+        $predmety = $this->dbh->fetchall_assoc();
+        return $predmety;
+    }
     public function getAll($semesterID)
     {
         $sql =
