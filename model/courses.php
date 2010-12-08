@@ -123,8 +123,8 @@ public function getForUserCourse($userID, $semester) {
                     course.abbreviation AS skratka,
                     course.lecture_hours AS pred_hod,
                     course.exercise_hours cvic_hod,
-                    p2c.id_group AS id_pedagog_typ
-
+                    p2c.id_group AS id_pedagog_typ,
+					g.name
              FROM   person_course p2c JOIN course ON p2c.id_course = course.id
              JOIN groups g ON g.id = p2c.id_group
              WHERE  p2c.id_person=$1

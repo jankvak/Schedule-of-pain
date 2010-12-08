@@ -169,10 +169,15 @@ echo '<p><a href="all/priorities/getPrevPriorities">Prebrať osobné časové pr
 					<?php
 						foreach( $courses as $cours)
 						{
-							echo '<li style="width:100px; height:100px;" ><div class="predmet" id="';
+						
+							echo '<li style="width:100px; height:100px;" ><div class="predmet" style="';
+							if ($cours['id_pedagog_typ']==3) echo 'background-color:orange';
+							echo '" id="';
 							echo $cours['skratka'];
 							echo '" >';
 							echo $cours['skratka'];
+							echo '<br>';
+							echo $cours['name'];
 							echo '</div></li>';
 						}
 					?>

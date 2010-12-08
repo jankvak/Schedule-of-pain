@@ -31,6 +31,7 @@
       drop: function(ev, ui) { 
 		$(this).html(ui.draggable.attr("id"));
 		
+		
 	  }
     });
 		$('#sel_a').click(function(){
