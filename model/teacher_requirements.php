@@ -130,11 +130,7 @@ class TeacherRequirements extends Model
             $id_person, $id_event, $this->requirement['komentare']['vseobecne']
         ));
 
-        /*$this->dbh->query($sql, array(
-            $this->course_id, $id_person, $this->typ_poziadavky
-        ));
         $metaPoziadavkaID = $this->dbh->GetLastInsertID();
-        */
 
         // uloz komentare (posledny parameter
         //Comments::saveComment($metaPoziadavkaID, $this->requirement['komentare']['vseobecne'],1,$id_person);
@@ -147,33 +143,46 @@ class TeacherRequirements extends Model
         }*/
 
         // nasledne uloz rozlozenia
-        /*foreach($this->requirement["layouts"] as $layout)
+        foreach($this->requirement["layouts"] as $layout)
         {
-            $this->__saveLayout($layout, $id_person, $metaPoziadavkaID);
-        }*/
+            $this->__saveLayout($layout, $id_person, $id_event);
+        }
         //$this->dbh->TransactionEnd();
     }
 
-    private function __saveLayout($layout, $id_person, $metaPoziadavkaID) {
-        $query =
-            "INSERT INTO rozlozenie(id_meta_poziadavka, pocet_v_tyzdni, \"1\", \"2\", \"3\", \"4\", \"5\", \"6\", \"7\", \"8\", \"9\", \"10\", \"11\", \"12\", \"13\")
-             VALUES($1, $2";
-        $params = array($metaPoziadavkaID, $layout["lecture_count"]);
-        // precykluj poziadavky inteligentne, ciarky davaj pred, tam bude treba vzdy aby
-        // sa nemusela kontrolovat na konci ci dat/nedat ciarku
-        for ($i=0;$i<=12;$i++)
-        {
-            $query .= ", $".($i+3);
-            $params[] = isset($layout['weeks'][$i]);
-        }
-        $query .= ")";
+    private function __saveLayout($layout, $id_person, $id_event) {
+        for ($lecture=0;$lecture<=$layout["lecture_count"];$lecture++) {
+            $query =
+                "INSERT INTO time_event(id)
+                        VALUES (DEFAULT)";
+                "INSERT INTO rozlozenie(id_meta_poziadavka, pocet_v_tyzdni, \"1\", \"2\", \"3\", \"4\", \"5\", \"6\", \"7\", \"8\", \"9\", \"10\", \"11\", \"12\", \"13\")
+                 VALUES($1, $2";
+            $this->dbh->query($query);
+            $id_time_event = $this->dbh->GetLastInsertID();
+            $query =
+                "INSERT INTO event_time_event(id_event, id_time_event)
+                        VALUES($1, $2)";
+            $this->dbh->query($query, array(
+                $id_event, $id_time_event
+            ));
 
-        $this->dbh->query($query, $params);
-        $id_layout = $this->dbh->GetLastInsertID();
+            //tu zapisem do db tyzdne, v ktorych sa prednaska nekona
+            for ($i=0;$i<=12;$i++)
+            {
+                if (!isset($layout['weeks'][$i])) {
+                    $this->dbh->query(
+                        "INSERT INTO time_event_exclusion(id_time_event, \"order\")
+                                VALUES($1, $2)",
+                        array($id_time_event, $i)
+                    );
+                }
+            }
 
-        foreach($layout['requirement'] as $requirement) {
-            $this->__saveRequirement($requirement, $id_layout);
         }
+        //TODO:: opravit
+        //foreach($layout['requirement'] as $requirement) {
+        //    $this->__saveRequirement($requirement, $id_time_event);
+        //}
     }
 
     private function __saveRequirement($requirement, $id_layout)
