@@ -63,7 +63,7 @@ class Priorities extends Model {
     private function __drop($user_id, $semesterID) {
         $query =
             "DELETE FROM time_priority
-        	 WHERE id_pedagog=$1  AND id_semester=$2";
+        	 WHERE id_person=$1  AND id_semester=$2";
         $this->dbh->query($query, array($user_id, $semesterID));
         $query =
             "DELETE FROM priority_comment
