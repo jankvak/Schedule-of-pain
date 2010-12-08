@@ -6,6 +6,13 @@
 .ui-dropdownchecklist-selector-wrapper {
 	vertical-align: middle;
 }
+ label.my {
+    font-weight: bold;
+   width: 10em;
+    margin-top: 4px;
+    display: inline;
+    float: none;
+}
 .ui-dropdownchecklist-selector {
 	padding: 1px 1px 1px 3px;
 }
