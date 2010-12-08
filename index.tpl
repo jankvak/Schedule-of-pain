@@ -86,8 +86,9 @@
   </div>
         
   <div id="footer">
-        Vytvorili tímy: <a href="http://labss2.fiit.stuba.sk/TeamProject/2008/team20is-si/" target="_blank">#backspace</a> 2008-2009,
-        <a href="http://labss2.fiit.stuba.sk/TeamProject/2009/team19is-si/" target="_blank">BugHunters</a> 2009-2010 {SVN_VERSION}
+        Vytvorili tímy:<br/><a href="http://labss2.fiit.stuba.sk/TeamProject/2008/team20is-si/" target="_blank">#backspace</a> 2008-2009,<br/>
+        <a href="http://labss2.fiit.stuba.sk/TeamProject/2009/team19is-si/" target="_blank">BugHunters</a> 2009-2010,<br/>
+        <a href="http://labss2.fiit.stuba.sk/TeamProject/2010/team07is-si/" target="_blank">Schedule of Pain</a> 2010-2011
   </div>
 
 </div>
