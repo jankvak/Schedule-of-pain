@@ -13,10 +13,12 @@ class PrioritiesController extends AppController {
     }
 
     function index() {
+        $cour=new Courses();
         $this->set('priorities', $this->priorities->load($this->getUserID(), $this->getSemesterID()));
         $this->set('types', $this->priorities->loadTypes());
         $this->set('comment', $this->priorities->getComment($this->getUserID(), $this->getSemesterID()));
         $this->set("semester_id", $this->getSemesterID());
+        $this->set('courses', $cour->getForUserCourse($this->getUserID(), $this->getSemesterID()));
     }
 
     function save() {
