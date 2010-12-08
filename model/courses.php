@@ -124,13 +124,16 @@ public function getForUserCourse($userID, $semester) {
                     course.lecture_hours AS pred_hod,
                     course.exercise_hours cvic_hod,
                     p2c.id_group AS id_pedagog_typ
+
              FROM   person_course p2c JOIN course ON p2c.id_course = course.id
+             JOIN groups g ON g.id = p2c.id_group
              WHERE  p2c.id_person=$1
                 AND EXISTS (
                         SELECT 1
                         FROM   course_semester c2s
                         WHERE  c2s.id_course = course.id
-                           AND c2s.id_semester=$2)
+                           AND c2s.id_semester=$2
+                           AND p2c.id_group between 3 AND 4)
              ORDER BY course.name";
         //vp.id_pedagog_typ=$1 AND
         $this->dbh->query($query, array($userID, $semester));
