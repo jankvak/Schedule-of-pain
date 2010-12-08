@@ -3,41 +3,6 @@
 <script type="text/javascript" src="js/jquery-plugins/jcarousellite.min.js"></script>
 
 
-<script type="text/javascript">
-$(document).ready(function(){
-
-	$("#carousel").jCarouselLite({
-		btnNext: ".nextb",
-		btnPrev: ".prevb",
-		visible: 5,
-		circular:true
-	});
-	
-	
-	$( ".predmet" ).draggable({  
-		tolerance:"pointer" ,
-		snapMode: "inner",
-		helper: "clone",
-		appendTo: "body"
-		});
-	
-	$(".editable").droppable({
-      drop: function(ev, ui) { 
-		$(this).html(ui.draggable.attr("id"));
-		
-	  }
-    });
-	
-	$("button.prevb").click(function(){
-	
-	});
-
-	$("button.nextb").click(function(){
-	
-	});
-
-});
-</script>
 
 <?php $raster=array(array(),array(),array(),array(),array());
 $defColor;
@@ -201,7 +166,16 @@ echo '<p><a href="all/priorities/getPrevPriorities">Prebrať osobné časové pr
 			
 			<div id="carousel"  >
 				<ul >
-					<li style="width:100px; height:100px;" ><div class="predmet" id="1" >predmet1</div></li>
+					<?php
+						foreach( $courses as $cours)
+						{
+							echo '<li style="width:100px; height:100px;" ><div class="predmet" id="';
+							echo $cours['skratka'];
+							echo '" >';
+							echo $cours['skratka'];
+							echo '</div></li>';
+						}
+					?>
 					
 					<li style="width:100px; height:100px;" ><div> </div></li>
 					<li style="width:100px; height:100px;" ><div> </div></li>

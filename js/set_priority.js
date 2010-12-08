@@ -11,6 +11,28 @@
 	//		stlpec nadobuda hodnoty {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15}
 	
 	$(document).ready(function() {	
+	//inicializácia prvku carousel - posuvný kontajner pre predmety
+	$("#carousel").jCarouselLite({
+		btnNext: ".nextb",
+		btnPrev: ".prevb",
+		visible: 5,
+		circular:true
+	});
+	
+	//inicializácia predmetu ako presunute¾ného prvku
+	$( ".predmet" ).draggable({  
+		tolerance:"pointer" ,
+		snapMode: "inner",
+		helper: "clone",
+		appendTo: "body"
+		});
+	//inicializácia kolonky v rozvrhu na akceptovanie predmetu
+	$(".editable").droppable({
+      drop: function(ev, ui) { 
+		$(this).html(ui.draggable.attr("id"));
+		
+	  }
+    });
 		$('#sel_a').click(function(){
 			if ($('#sel_a').hasClass("sel")) ;
 			else {
