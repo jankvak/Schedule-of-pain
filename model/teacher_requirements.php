@@ -145,25 +145,26 @@ class TeacherRequirements extends Model
         // nasledne uloz rozlozenia
         foreach($this->requirement["layouts"] as $layout)
         {
-            $this->__saveLayout($layout, $id_person, $id_event);
+            $this->__saveLayout($layout, $id_person, $metaPoziadavkaID);
         }
+        $this->__saveRequirement($this->requirement["layouts"]["a"]["requirement"][1], $id_event);
+        //$this->__saveEquipment($requirement['equipment'], $requirement_id);
+        $this->__saveRooms($this->requirement["layouts"]["a"]["requirement"][1]["rooms"], $metaPoziadavkaID);
         //$this->dbh->TransactionEnd();
     }
 
-    private function __saveLayout($layout, $id_person, $id_event) {
+    private function __saveLayout($layout, $id_person, $id_request) {
         for ($lecture=0;$lecture<=$layout["lecture_count"];$lecture++) {
             $query =
                 "INSERT INTO time_event(id)
                         VALUES (DEFAULT)";
-                "INSERT INTO rozlozenie(id_meta_poziadavka, pocet_v_tyzdni, \"1\", \"2\", \"3\", \"4\", \"5\", \"6\", \"7\", \"8\", \"9\", \"10\", \"11\", \"12\", \"13\")
-                 VALUES($1, $2";
             $this->dbh->query($query);
             $id_time_event = $this->dbh->GetLastInsertID();
             $query =
                 "INSERT INTO event_time_event(id_event, id_time_event)
-                        VALUES($1, $2)";
+                        SELECT id_event, $2 FROM request WHERE id = $1";
             $this->dbh->query($query, array(
-                $id_event, $id_time_event
+                $id_request, $id_time_event
             ));
 
             //tu zapisem do db tyzdne, v ktorych sa prednaska nekona
@@ -179,28 +180,25 @@ class TeacherRequirements extends Model
             }
 
         }
-        //TODO:: opravit
-        //foreach($layout['requirement'] as $requirement) {
-        //    $this->__saveRequirement($requirement, $id_time_event);
-        //}
     }
 
-    private function __saveRequirement($requirement, $id_layout)
+    private function __saveRequirement($requirement, $id_event)
     {
         $query =
-            "INSERT INTO poziadavka(id_rozlozenie, rozsah_hodin, sucastne,
-             cvic_hned_po_prednaske, cvic_skor_ako_predn, ine) 
-             VALUES($1, $2, 0, $3, $4, $5)";
+            "UPDATE course
+                SET lecture_hours = $2
+              WHERE EXISTS(SELECT 1 FROM event WHERE event.id_course = course.id AND event.id = $1)";
+            //"INSERT INTO poziadavka(id_rozlozenie, rozsah_hodin, sucastne,
+            // cvic_hned_po_prednaske, cvic_skor_ako_predn, ine)
+            // VALUES($1, $2, 0, $3, $4, $5)";
 
         $this->dbh->query($query, array(
-            $id_layout, $requirement['lecture_hours'], isset($requirement['after_lecture']),
-            isset($requirement['before_lecture']), $requirement['comment']
+            $id_event, $requirement['lecture_hours']
+            //$id_layout, $requirement['lecture_hours'], isset($requirement['after_lecture']),
+            //isset($requirement['before_lecture']), $requirement['comment']
         ));
 
         $requirement_id = $this->dbh->GetLastInsertID();
-
-        $this->__saveEquipment($requirement['equipment'], $requirement_id);
-        $this->__saveRooms($requirement['rooms'], $requirement_id);
     }
 
     // TODO: mozno dakedy daleko v buducnosti:
@@ -234,24 +232,33 @@ class TeacherRequirements extends Model
 
     private function __saveRooms($rooms, $requirement_id) {
         $query =
-            "INSERT INTO poziadavka_miestnost(id_poziadavka, pocet_studentov, zelana_kapacita, zelany_typ)
-             VALUES($1, $2, $3, 1)";
+            "UPDATE course
+                SET student_count = $2
+              WHERE EXISTS(
+                        SELECT 1
+                          FROM event JOIN request ON request.id_event = event.id
+                         WHERE event.id_course = course.id
+                           AND request.id = $1)";
         $this->dbh->query($query, array(
             $requirement_id, $rooms['students_count'], $rooms['capacity']
         ));
-
-        $rooms_id = $this->dbh->GetLastInsertID();
+        $query =
+            "INSERT INTO request_room(id_request, requested_capacity, requested_type)
+                    VALUES ($1, $2, 1)";
+        $this->dbh->query($query, array(
+            $requirement_id, $rooms['capacity']
+        ));
 
         foreach($rooms['selected'] as $room) {
-            $this->__saveRoom($room, $rooms_id);
+            $this->__saveRoom($room, $requirement_id);
         }
     }
 
-    private function __saveRoom($room, $rooms_id) {
+    private function __saveRoom($room, $requiremnet_id) {
         $query =
-            "INSERT INTO poziadavka_miestnost_miestnosti(id_poziadavka_miestnost, id_miestnost, sucastne_index)
-             VALUES($1, $2, 1)";
-        $this->dbh->query($query, array($rooms_id, $room));
+            "INSERT INTO request_room(id_request, id_room)
+                    VALUES($1, $2)";
+        $this->dbh->query($query, array($requirement_id, $room));
     }
 
     //*************************************LOAD*******************************************************
