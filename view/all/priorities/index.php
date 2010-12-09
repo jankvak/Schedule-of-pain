@@ -3,41 +3,6 @@
 <script type="text/javascript" src="js/jquery-plugins/jcarousellite.min.js"></script>
 
 
-<script type="text/javascript">
-$(document).ready(function(){
-
-	$("#carousel").jCarouselLite({
-		btnNext: ".nextb",
-		btnPrev: ".prevb",
-		visible: 5,
-		circular:true
-	});
-	
-	
-	$( ".predmet" ).draggable({  
-		tolerance:"pointer" ,
-		snapMode: "inner",
-		helper: "clone",
-		appendTo: "body"
-		});
-	
-	$(".editable").droppable({
-      drop: function(ev, ui) { 
-		$(this).html(ui.draggable.attr("id"));
-		
-	  }
-    });
-	
-	$("button.prevb").click(function(){
-	
-	});
-
-	$("button.nextb").click(function(){
-	
-	});
-
-});
-</script>
 
 <?php $raster=array(array(),array(),array(),array(),array());
 $defColor;
@@ -66,6 +31,10 @@ foreach( $priorities as $priority)
 
 ?>
 <h2>Osobné časové priority</h2>
+<?php
+foreach( $courses as $cours)
+            echo $cours['nazov'];
+?>
 <?php if($read_only_semester != true)
 echo '<p><a href="all/priorities/getPrevPriorities">Prebrať osobné časové priority z minulého roka</a></p><br />';
 ?>
@@ -197,7 +166,21 @@ echo '<p><a href="all/priorities/getPrevPriorities">Prebrať osobné časové pr
 			
 			<div id="carousel"  >
 				<ul >
-					<li style="width:100px; height:100px;" ><div class="predmet" id="1" >predmet1</div></li>
+					<?php
+						foreach( $courses as $cours)
+						{
+						
+							echo '<li style="width:100px; height:100px;" ><div class="predmet" style="';
+							if ($cours['id_pedagog_typ']==3) echo 'background-color:orange';
+							echo '" id="';
+							echo $cours['skratka'];
+							echo '" >';
+							echo $cours['skratka'];
+							echo '<br>';
+							echo $cours['name'];
+							echo '</div></li>';
+						}
+					?>
 					
 					<li style="width:100px; height:100px;" ><div> </div></li>
 					<li style="width:100px; height:100px;" ><div> </div></li>
@@ -226,6 +209,8 @@ echo '<p><a href="all/priorities/getPrevPriorities">Prebrať osobné časové pr
 		</div>
 	</div>
 <?php
+        foreach( $courses as $cours)
+            echo $cours['name'];
 	foreach( $priorities as $priority) 
 	{
     	for($i=$priority['start'];$i<=$priority['end'];$i++) 
