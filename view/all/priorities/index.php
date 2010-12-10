@@ -31,10 +31,6 @@ foreach( $priorities as $priority)
 
 ?>
 <h2>Osobné časové priority</h2>
-<?php
-foreach( $courses as $cours)
-            echo $cours['nazov'];
-?>
 <?php if($read_only_semester != true)
 echo '<p><a href="all/priorities/getPrevPriorities">Prebrať osobné časové priority z minulého roka</a></p><br />';
 ?>
@@ -169,16 +165,34 @@ echo '<p><a href="all/priorities/getPrevPriorities">Prebrať osobné časové pr
 					<?php
 						foreach( $courses as $cours)
 						{
-						
-							echo '<li style="width:100px; height:100px;" ><div class="predmet" style="';
-							if ($cours['id_pedagog_typ']==3) echo 'background-color:orange';
-							echo '" id="';
-							echo $cours['skratka'];
-							echo '" >';
-							echo $cours['skratka'];
-							echo '<br>';
-							echo $cours['name'];
-							echo '</div></li>';
+							if ($cours['id_pedagog_typ']==3)
+							{
+							for($i=0;$i<$cours['pred_hod'];$i++)
+							{
+									echo '<li style="width:100px; height:100px;" ><div class="predmet" style="background-color:#3D3DFF"';
+									echo ' id="';
+									echo $cours['skratka'];
+									echo '" >';
+									echo $cours['skratka'];
+									echo '<br> Prednáška <br>' ;
+									echo $cours['id'];
+									echo '</div></li>';
+							}
+							for($i=0;$i<$cours['cvic_hod'];$i++)
+							{
+									echo '<li style="width:100px; height:100px;" ><div class="predmet" style="background-color:#0080FF"';
+									echo ' id="';
+									echo $cours['skratka'];
+									echo '" >';
+									echo $cours['skratka'];
+									echo '<br> Cvičenie <br>' ;
+									echo $cours['id'];
+									echo '</div></li>';
+							}
+							
+							}
+							
+							
 						}
 					?>
 					

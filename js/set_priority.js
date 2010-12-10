@@ -22,18 +22,34 @@
 	//inicializácia predmetu ako presunute¾ného prvku
 	$( ".predmet" ).draggable({  
 		tolerance:"pointer" ,
-		snapMode: "inner",
+		appendTo: "body",
 		helper: "clone",
-		appendTo: "body"
+		revert: "true",
+		opacity: 0.6,
+		distance: 1,
+		
+		start : function() {
+        this.style.display="none";
+
+        },
+		stop : function() {
+        this.style.display="";
+        },
+
+
 		});
 	//inicializácia kolonky v rozvrhu na akceptovanie predmetu
 	$(".editable").droppable({
       drop: function(ev, ui) { 
-		$(this).html(ui.draggable.attr("id"));
-		
+		$(this).html(ui.draggable.attr("id"));	
+		ui.helper.remove();
+		ui.revert("false");
+	
 		
 	  }
     });
+	
+	
 		$('#sel_a').click(function(){
 			if ($('#sel_a').hasClass("sel")) ;
 			else {
