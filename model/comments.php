@@ -30,10 +30,10 @@ class Comments extends Model {
         if (!isset($text) || $text=="") return;
 
         // vyskladanie celeho mena osoby identifikovanej cez id_osob
-        $sql = "SELECT * FROM pedagog WHERE id=$1";
+        $sql = "SELECT * FROM person WHERE id=$1";
         $this->dbh->query($sql, array($id_osoba));
         $osoba = $this->dbh->fetch_assoc();
-        $meno = "{$osoba[tituly_pred]} {$osoba[meno]} {$osoba[priezvisko]}, {$osoba[tituly_za]}";
+        $meno = "{$osoba[titles_before]} {$osoba[name]} {$osoba[last_name]}, {$osoba[titles_after]}";
 
         $sql =
             "INSERT INTO komentar (id_meta_poziadavka, text, typ, zadal, cas_zadania)

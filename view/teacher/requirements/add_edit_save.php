@@ -128,16 +128,7 @@ function reqhtml($id_requirement, $id_layout, $capacities, $roomsByName, $predna
 						<div class="left_side">Stoličky navyše: <input size="5" value="' . $chair_count . '" name="requirement[layouts][' . $id_layout . '][requirement][' . $id_requirement . '][equipment][chair_count]" ' . $disabledReq . '/></div>
 						<div class="right_side" style="width: 100px;"><input type="checkbox" style="margin-left: 0px;" name="requirement[layouts][' . $id_layout . '][requirement][' . $id_requirement . '][equipment][beamer]" ' . $disabledReq . ' ' . $beamer . '/> projektor</div>
 					</div>
-                                        <div class="row" style="width: 400px;">
-						<div class="left_side">Vybavenie:</div>
-						<div class="right_side" style="width: 100px;">
-                                                <select id="s2" multiple="multiple">';
-                                        foreach ($equips as $eq) {
-                                                    $html .= '<option>' . $eq["type"] . '</option>';
-                                        }
-                                               $html .= '  </select>
-                                                </div>
-					</div>
+                                        
                                        
                     <div class="row" style="width: 400px;">
 						<div class="left_side">Kapacita miestnosti:</div>
@@ -149,6 +140,16 @@ function reqhtml($id_requirement, $id_layout, $capacities, $roomsByName, $predna
     }
     $html .= '</select>
                         </div>
+					</div>
+                                        <div class="row" style="width: 400px;">
+						<div class="left_side">Vybavenie:</div>
+						<div class="right_side" style="width: 100px;">
+                                                <select id="s2" multiple="multiple">';
+                                        foreach ($equips as $eq) {
+                                                    $html .= '<option>' . $eq["type"] . '</option>';
+                                        }
+                                               $html .= '  </select>
+                                                </div>
 					</div>';
 
     //select na konkretne miestnosti
@@ -296,10 +297,13 @@ if (!isset($requirement))
     <div class="row" style="margin-bottom: 10px;">
         Požiadavka na softvér:<br />
         <select id="s1" multiple="multiple">
-            <option>Visual studio</option>
-            <option>Rational software architect</option>
-            <option>Webshere</option>
-            <option>Eclipse</option>
+            <?php
+            foreach ($software as $soft){
+                echo'<option>';
+                echo $soft[name];
+                echo'</option>';
+            }
+            ?>
         </select>
         <textarea rows="3" style="height:52px;" cols="70" name='requirement[komentare][sw]'><?php echoParam($requirement["komentare"]["sw"]); ?></textarea><br />
     </div>

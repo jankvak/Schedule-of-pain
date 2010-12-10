@@ -130,6 +130,7 @@ class RequirementsController extends AppController {
      */
     private function __getCommonData($courseID) {
         $rooms = new Rooms();
+        $soft = new Software();
         $equip = new Equipment();
         $subjects = new Subjects();
         $student_count = $subjects->getStudentCount($courseID);
@@ -138,6 +139,7 @@ class RequirementsController extends AppController {
         $this->set('capacities', $rooms->getCapacities("DESC"));
         $this->set('equips', $equip->getAllTypes());
         $this->set('rooms', $rooms->getAll());
+        $this->set('software', $soft->getAll());
         // zoradene, len podla nazvu
         $this->set('roomsByName', $rooms->getAll(true));
         $this->set('subject', $subjects->getSubject($courseID));
