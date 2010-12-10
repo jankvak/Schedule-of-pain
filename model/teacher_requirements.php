@@ -240,25 +240,21 @@ class TeacherRequirements extends Model
                          WHERE event.id_course = course.id
                            AND request.id = $1)";
         $this->dbh->query($query, array(
-            $requirement_id, $rooms['students_count'], $rooms['capacity']
+            $requirement_id, $rooms['students_count']
         ));
-        $query =
-            "INSERT INTO request_room(id_request, requested_capacity, requested_type)
-                    VALUES ($1, $2, 1)";
-        $this->dbh->query($query, array(
-            $requirement_id, $rooms['capacity']
-        ));
+        
 
         foreach($rooms['selected'] as $room) {
-            $this->__saveRoom($room, $requirement_id);
+            $this->__saveRoom($room, $requirement_id, $rooms);
         }
     }
 
-    private function __saveRoom($room, $requiremnet_id) {
+    private function __saveRoom($room, $requirement_id,$rooms) {
+
         $query =
-            "INSERT INTO request_room(id_request, id_room)
-                    VALUES($1, $2)";
-        $this->dbh->query($query, array($requirement_id, $room));
+            "INSERT INTO request_room(id_request,requested_capacity, requested_type, id_room)
+                    VALUES($1, $2,'1',$3)";
+        $this->dbh->query($query, array($requirement_id,$rooms['capacity'], $room));
     }
 
     //*************************************LOAD*******************************************************
