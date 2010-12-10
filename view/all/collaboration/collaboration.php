@@ -8,7 +8,7 @@ foreach ($collaboration_menu as $collaboration_menu_item) {
 ?>
 <br/><br/>
 <h6>Príspevky:</h6>
-<p><a href="all/collaboration/message/<?php echo $collaboration_id; ?>/">Nový príspevok</a></p><br/>
+<p><a href="all/collaboration/message/add/<?php echo $collaboration_id; ?>/">Nový príspevok</a></p><br/>
 <table class="sorted-table paged-table filtered {sortlist: [[1,1]], pagesizes:[10,25,50], selpagesize: 0}">
     <thead>
         <tr>
@@ -23,8 +23,15 @@ foreach ($collaboration_menu as $collaboration_menu_item) {
             echo '<tr>';
             echo '<td>' . $collaboration_post['name'] . ' ' . $collaboration_post['last_name'] . '</td>';
             echo '<td align="center">' . date('d.m.Y H:i', $collaboration_post['timestamp']) . '</td>';
-            echo '<td>' . $collaboration_post['message'] . '</td>';
-            echo '</tr>';
+            echo '<td>';
+            echo $collaboration_post['message'];
+            if ($collaboration_post['id_person'] ==  $current_user_id)
+            {
+                echo '<br/><a href="all/collaboration/message/edit/' . $collaboration_id . '/' . $collaboration_post['id'] . '/">Upraviť</a>';
+                echo ' ';
+                echo '<a href="all/collaboration/message/delete/' . $collaboration_id . '/' . $collaboration_post['id'] . '/">Zmazať</a>';
+            }
+            echo '</td></tr>';
         }
         ?>
     </tbody>

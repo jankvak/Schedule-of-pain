@@ -39,6 +39,7 @@ class CollaborationController extends AppController {
         $this->set('collaboration_posts', $collaboration_posts);
         $this->set('collaboration_info', $collaboration_info);
         $this->set('collaboration_id', $collaboration_id);
+        $this->set('current_user_id', $this->session->read("uid"));
     }
 
     function admin($collaboration_id) {
@@ -73,10 +74,27 @@ class CollaborationController extends AppController {
         $this->set('current_user_id', $this->session->read("uid"));
     }
 
-    function message($collaboration_id) {
+    function message($action, $collaboration_id, $post_id) {
         $collaboration_info = $this->collaboration->getCollaborationInfo($collaboration_id);
         $this->set('collaboration_info', $collaboration_info);
         $this->set('collaboration_id', $collaboration_id);
+
+        switch ($action) {
+            case 'add': {
+                    break;
+                }
+            case 'edit': {
+                    $post = $this->collaboration_data->getPost($post_id);
+                    $this->set('post', $post);
+                    $this->set('post_id', $post_id);
+                    break;
+                }
+            case 'delete': {
+                    $this->collaboration_data->deletePost($post_id);
+                    $this->redirect("all/collaboration/collaboration/{$collaboration_id}");
+                    break;
+                }
+        }
     }
 
     function getCollaborationRoles($collaboration_users) {
@@ -139,6 +157,23 @@ class CollaborationController extends AppController {
             $checked = $this->bind($this->collaboration_data);
 
             $this->collaboration_data->saveMessage($collaboration_id, $this->session->read('uid'));
+            //notifikujeme admina o pridani pripomienky
+            //$this->notificator->sendSuggestionAddedMsg($this->suggestions);
+            //zalogujeme a oznamime pouzivatelovi
+            //$this->log("Vloženie pripomienky");
+            //$this->flash('Pripomienka vložená', 'info');
+            $this->redirect('all/collaboration/collaboration/' . $collaboration_id);
+        }
+        catch(dataValidationException $ex) {
+            $this->_invalid_data($ex->checked);
+        }
+    }
+
+    function editMessage($collaboration_id,$post_id) {
+        try {
+            $checked = $this->bind($this->collaboration_data);
+
+            $this->collaboration_data->editMessage($post_id);
             //notifikujeme admina o pridani pripomienky
             //$this->notificator->sendSuggestionAddedMsg($this->suggestions);
             //zalogujeme a oznamime pouzivatelovi
