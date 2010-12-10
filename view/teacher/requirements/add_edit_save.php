@@ -146,7 +146,7 @@ function reqhtml($id_requirement, $id_layout, $capacities, $roomsByName, $predna
 						<div class="right_side" style="width: 100px;">
                                                 <select id="s2" multiple="multiple">';
                                         foreach ($equips as $eq) {
-                                              if(in_array($req["rooms"]["equipment"],$eq))
+                                              if(in_array($req["equipment"],$eq))
                                                $sel="selected";
                                               else 
                                                   $sel="";
@@ -303,9 +303,12 @@ if (!isset($requirement))
         <select id="s1" multiple="multiple">
             <?php
             foreach ($software as $soft){
-                echo'<option>';
-                echo $soft[name];
-                echo'</option>';
+                if(in_array($req["software"],$soft))
+                  $sel="selected";
+                else
+                  $sel="";
+                echo '<option ' . $sel . '>' . $soft["name"] . '</option>';
+                
             }
             ?>
         </select>

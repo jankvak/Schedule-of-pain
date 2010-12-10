@@ -369,7 +369,8 @@ class TeacherRequirements extends Model
             "before_lecture"    => $req["cvic_skor_ako_predn"],
             "comment"           => $req["ine"],
             "rooms"             => $this->__loadRooms($req["id_poziadavka"]),
-            "equipment"         => $this->__loadEquipment($req["id_poziadavka"])
+            "equipment"         => $this->__loadEquipment($req["id_poziadavka"]),
+            "software"          => $this->__loadSoftware($reqID["id_poziadavka"])
         );
     }
 
@@ -452,6 +453,13 @@ class TeacherRequirements extends Model
         $vybavenie = $this->dbh->fetchall_assoc();
         // default hodnoty ak nezadane, uviest vsetky ...
         return $vybavenie;
+    }
+    private function __loadSoftware($reqID) {
+         $sql = "SELECT * FROM request_software WHERE id_request=$1";
+        $this->dbh->query($sql, array($reqID));
+        $software = $this->dbh->fetchall_assoc();
+        // default hodnoty ak nezadane, uviest vsetky ...
+        return $software;
     }
 
     //*********************************OTHER**********************************************************
