@@ -146,7 +146,11 @@ function reqhtml($id_requirement, $id_layout, $capacities, $roomsByName, $predna
 						<div class="right_side" style="width: 100px;">
                                                 <select id="s2" multiple="multiple">';
                                         foreach ($equips as $eq) {
-                                                    $html .= '<option>' . $eq["type"] . '</option>';
+                                              if(in_array($req["rooms"]["equipment"],$eq))
+                                               $sel="selected";
+                                              else 
+                                                  $sel="";
+                                            $html .= '<option ' . $sel . '>' . $eq["type"] . '</option>';
                                         }
                                                $html .= '  </select>
                                                 </div>

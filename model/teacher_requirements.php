@@ -332,7 +332,7 @@ class TeacherRequirements extends Model
     private function __loadRequirements($rozlozenieID)
     {
         $sql =
-            "SELECT p.* FROM poziadavka p
+            "SELECT p.* FROM request p
              WHERE id_rozlozenie=$1";
         $this->dbh->query($sql, array($rozlozenieID));
         $requirements = $this->dbh->fetchall_assoc();
@@ -379,17 +379,30 @@ class TeacherRequirements extends Model
      * @return <array>  - pole vo formate requirement
      */
     private function __loadRooms($reqID) {
-        $sql = "SELECT * FROM poziadavka_miestnost WHERE id_poziadavka=$1";
+//        $sql = "SELECT id AS id_poziadavka_miestnost, id_request AS id_poziadavka, requested_type AS zelany_typ, requested_capacity AS pocet_studentov, requested_capacity AS zelana_kapacita, id_room FROM request_room WHERE id_request=$1";
+//        $this->dbh->query($sql, array($reqID));
+//        // prednasky => predpokladam iba jeden zaznam
+//        $rooms = $this->dbh->fetch_assoc();
+//
+//        $res = array(
+//            "students_count"    => $rooms["pocet_studentov"],
+//            "capacity"          => $rooms["zelana_kapacita"],
+//            "selected"          => $this->__loadSelectedRooms($rooms["id_poziadavka_miestnost"])
+//        );
+           $sql = "SELECT id AS id_poziadavka_miestnost, id_request AS id_poziadavka, requested_type AS zelany_typ, requested_capacity AS pocet_studentov, requested_capacity AS zelana_kapacita, id_room FROM request_room WHERE id_request=$1";
         $this->dbh->query($sql, array($reqID));
         // prednasky => predpokladam iba jeden zaznam
-        $rooms = $this->dbh->fetch_assoc();
-
+        $rooms = $this->dbh->fetchall_assoc();
+        foreach ($rooms as $selectedRoom) {
+            $roomSel[] = $selectedRoom["id_room"];
+        }
+        if(!is_null($rooms)){
         $res = array(
-            "students_count"    => $rooms["pocet_studentov"],
-            "capacity"          => $rooms["zelana_kapacita"],
-            "selected"          => $this->__loadSelectedRooms($rooms["id_poziadavka_miestnost"])
+            "students_count"    => $rooms[0]["pocet_studentov"],
+            "capacity"          => $rooms[0]["zelana_kapacita"],
+            "selected"          => $roomSel
         );
-
+        };
         return $res;
     }
 
@@ -408,6 +421,8 @@ class TeacherRequirements extends Model
             $res[] = $selectedRoom["id_miestnost"];
         }
         return $res;
+
+
     }
 
     /**
@@ -417,21 +432,26 @@ class TeacherRequirements extends Model
      */
     private function __loadEquipment($reqID) {
     // mohol by spravit aj join ale nakolko vklada podla IDcok to iste spravi aj tu
-        $sql = "SELECT pv.* FROM poziadavka_vybavenie pv WHERE pv.id_poziadavka=$1";
+//        $sql = "SELECT pv.* FROM poziadavka_vybavenie pv WHERE pv.id_poziadavka=$1";
+//        $this->dbh->query($sql, array($reqID));
+//        $vybavenie = $this->dbh->fetchall_assoc();
+//        // default hodnoty ak nezadane, uviest vsetky ...
+//        $res = array(
+//            "chair_count"   => 0,
+//            "beamer"        => false,
+//            "notebook"      => false
+//        );
+//        foreach ($vybavenie as $vyb) {
+//            if ($vyb["id_vybavenie"] == 1) $res["notebook"] = true;
+//            elseif ($vyb["id_vybavenie"] == 2) $res["beamer"] = true;
+//            elseif ($vyb["id_vybavenie"] == 3) $res["chair_count"] = $vyb["pocet_kusov"];
+//        }
+//        return $res;
+         $sql = "SELECT pv.* FROM request_equipment pv WHERE pv.id_request=$1";
         $this->dbh->query($sql, array($reqID));
         $vybavenie = $this->dbh->fetchall_assoc();
         // default hodnoty ak nezadane, uviest vsetky ...
-        $res = array(
-            "chair_count"   => 0,
-            "beamer"        => false,
-            "notebook"      => false
-        );
-        foreach ($vybavenie as $vyb) {
-            if ($vyb["id_vybavenie"] == 1) $res["notebook"] = true;
-            elseif ($vyb["id_vybavenie"] == 2) $res["beamer"] = true;
-            elseif ($vyb["id_vybavenie"] == 3) $res["chair_count"] = $vyb["pocet_kusov"];
-        }
-        return $res;
+        return $vybavenie;
     }
 
     //*********************************OTHER**********************************************************
