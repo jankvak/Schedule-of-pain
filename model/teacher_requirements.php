@@ -323,7 +323,7 @@ class TeacherRequirements extends Model
 
     private function __loadLayouts($metaPoziadavkaID)
     {
-        $sql = "SELECT course.lecture_count AS pocet_v_tyzdni,
+        $sql = "SELECT request.id,
                        NOT \"IsNthEventExcluded\"(event.id, 0) AS \"1\",
                        NOT \"IsNthEventExcluded\"(event.id, 1) AS \"2\",
                        NOT \"IsNthEventExcluded\"(event.id, 2) AS \"3\",
@@ -348,9 +348,8 @@ class TeacherRequirements extends Model
         foreach ($layouts as &$layout)
         {
             $tayoutOut = array();
-            $layoutOut["lecture_count"] = $layout["pocet_v_tyzdni"];
             $layoutOut["weeks"] = $this->__loadWeeks($layout);
-            //$layoutOut["requirement"] = $this->__loadRequirements($layout["id"]);
+            $layoutOut["requirement"] = $this->__loadRequirements($layout["id"]);
 
             $res[$layoutIndex] = $layoutOut;
             $layoutIndex = chr(ord($layoutIndex)+1);
@@ -361,8 +360,12 @@ class TeacherRequirements extends Model
     private function __loadRequirements($rozlozenieID)
     {
         $sql =
-            "SELECT p.* FROM request p
-             WHERE id_rozlozenie=$1";
+            "SELECT course.lecture_hours AS rozsah_hodin,
+                    r.id AS id_poziadavka
+               FROM request r
+                        JOIN event ON r.id_event = event.id
+                        JOIN course ON event.id_course = course.id
+              WHERE r.id=$1";
         $this->dbh->query($sql, array($rozlozenieID));
         $requirements = $this->dbh->fetchall_assoc();
 
@@ -419,7 +422,17 @@ class TeacherRequirements extends Model
 //            "capacity"          => $rooms["zelana_kapacita"],
 //            "selected"          => $this->__loadSelectedRooms($rooms["id_poziadavka_miestnost"])
 //        );
-           $sql = "SELECT id AS id_poziadavka_miestnost, id_request AS id_poziadavka, requested_type AS zelany_typ, requested_capacity AS pocet_studentov, requested_capacity AS zelana_kapacita, id_room FROM request_room WHERE id_request=$1";
+           $sql = "SELECT request_room.id AS id_poziadavka_miestnost,
+                          request.id AS id_poziadavka,
+                          request_room.requested_type AS zelany_typ,
+                          course.student_count AS pocet_studentov,
+                          request_room.requested_capacity AS zelana_kapacita,
+                          request_room.id_room
+                     FROM request_room
+                              RIGHT OUTER JOIN request ON request_room.id_request = request.id
+                              JOIN event ON request.id_event = event.id
+                              JOIN course ON event.id_course = course.id
+                    WHERE request.id=$1";
         $this->dbh->query($sql, array($reqID));
         // prednasky => predpokladam iba jeden zaznam
         $rooms = $this->dbh->fetchall_assoc();
