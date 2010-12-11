@@ -1,0 +1,1 @@
+ALTER TABLE request_software RENAME COLUMN id_reqest TO id_request
