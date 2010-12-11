@@ -110,27 +110,40 @@ class TeacherRequirements extends Model
 
         // najprv uloz metapoziadavku
         $sql =
-            "INSERT INTO event(id_semester, id_course, event_type, confirmed)
-                    VALUES ($1,$2,$3,false)";
-        //    "INSERT INTO meta_poziadavka (id_predmet, id_osoba, id_poziadavka_typ, cas_pridania)
-        //	 VALUES($1, $2, $3, now())";
+            "SELECT event.id AS id_event, request.id AS id_request
+               FROM request JOIN event ON request.id_event = event.id
+              WHERE event.id_course = $1";
         $this->dbh->query($sql, array(
-
-            $this->periods->getLastSemesterID(),
-            $this->course_id,
-            $this->typ_poziadavky
+            $this->course_id
         ));
+        if ($this->dbh->RowCount()>0) {
+            $result = $this->dbh->fetch_assoc();
+            $id_event = $result["id_event"];
+            $metaPoziadavkaID = $result["id_request"];
+        } else {
+            $sql =
+                "INSERT INTO event(id_semester, id_course, event_type, confirmed)
+                        VALUES ($1,$2,$3,false)";
+            //    "INSERT INTO meta_poziadavka (id_predmet, id_osoba, id_poziadavka_typ, cas_pridania)
+            //	 VALUES($1, $2, $3, now())";
+            $this->dbh->query($sql, array(
 
-        $id_event = $this->dbh->GetLastInsertID();
+                $this->periods->getLastSemesterID(),
+                $this->course_id,
+                $this->typ_poziadavky
+            ));
 
-        $sql =
-            "INSERT INTO request(id_person, id_event, description)
-                    VALUES ($1, $2, $3)";
-        $this->dbh->query($sql, array(
-            $id_person, $id_event, $this->requirement['komentare']['vseobecne']
-        ));
+            $id_event = $this->dbh->GetLastInsertID();
 
-        $metaPoziadavkaID = $this->dbh->GetLastInsertID();
+            $sql =
+                "INSERT INTO request(id_person, id_event, description)
+                        VALUES ($1, $2, $3)";
+            $this->dbh->query($sql, array(
+                $id_person, $id_event, $this->requirement['komentare']['vseobecne']
+            ));
+
+            $metaPoziadavkaID = $this->dbh->GetLastInsertID();
+        }
 
         // uloz komentare (posledny parameter
         //Comments::saveComment($metaPoziadavkaID, $this->requirement['komentare']['vseobecne'],1,$id_person);
@@ -274,7 +287,7 @@ class TeacherRequirements extends Model
         $res["meta_poziadavka"] = $this->metaRequests->loadMetaRequest($metaPoziadavkaID);
         // ziskanie komentarov
         $res["requirement"]["komentare"] = $res["meta_poziadavka"]["komentar"];//$this->__loadComments($metaPoziadavkaID);
-        //TODO:rozlozenie:$res["requirement"]["layouts"] 	= $this->__loadLayouts($metaPoziadavkaID);
+        $res["requirement"]["layouts"] = $this->__loadLayouts($metaPoziadavkaID);
 
         return $res;
     }
@@ -310,7 +323,23 @@ class TeacherRequirements extends Model
 
     private function __loadLayouts($metaPoziadavkaID)
     {
-        $sql = "SELECT * FROM rozlozenie WHERE id_meta_poziadavka=$1";
+        $sql = "SELECT course.lecture_count AS pocet_v_tyzdni,
+                       NOT \"IsNthEventExcluded\"(event.id, 0) AS \"1\",
+                       NOT \"IsNthEventExcluded\"(event.id, 1) AS \"2\",
+                       NOT \"IsNthEventExcluded\"(event.id, 2) AS \"3\",
+                       NOT \"IsNthEventExcluded\"(event.id, 3) AS \"4\",
+                       NOT \"IsNthEventExcluded\"(event.id, 4) AS \"5\",
+                       NOT \"IsNthEventExcluded\"(event.id, 5) AS \"6\",
+                       NOT \"IsNthEventExcluded\"(event.id, 6) AS \"7\",
+                       NOT \"IsNthEventExcluded\"(event.id, 7) AS \"8\",
+                       NOT \"IsNthEventExcluded\"(event.id, 8) AS \"9\",
+                       NOT \"IsNthEventExcluded\"(event.id, 9) AS \"10\",
+                       NOT \"IsNthEventExcluded\"(event.id, 10) AS \"11\",
+                       NOT \"IsNthEventExcluded\"(event.id, 11) AS \"12\",
+                       NOT \"IsNthEventExcluded\"(event.id, 12) AS \"13\"
+                  FROM request JOIN event ON request.id_event = event.id
+                               JOIN course ON event.id_course = course.id
+                 WHERE request.id=$1";
         $this->dbh->query($sql, array($metaPoziadavkaID));
         $layouts = $this->dbh->fetchall_assoc();
 
@@ -321,7 +350,7 @@ class TeacherRequirements extends Model
             $tayoutOut = array();
             $layoutOut["lecture_count"] = $layout["pocet_v_tyzdni"];
             $layoutOut["weeks"] = $this->__loadWeeks($layout);
-            $layoutOut["requirement"] = $this->__loadRequirements($layout["id"]);
+            //$layoutOut["requirement"] = $this->__loadRequirements($layout["id"]);
 
             $res[$layoutIndex] = $layoutOut;
             $layoutIndex = chr(ord($layoutIndex)+1);
