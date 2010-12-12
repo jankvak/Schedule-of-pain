@@ -1,5 +1,13 @@
 <script type="text/javascript" src="js/switch_tab.js"></script>
+<script type="text/javascript">
+    $(document).ready(function() {
+        $("#s1").dropdownchecklist({ emptyText: "Prosim vyberte si ..."  });
+        $("#la").dropdownchecklist({ emptyText: "Prosim vyberte si ..."  });
+        $("#l2").dropdownchecklist({ emptyText: "Prosim vyberte si ..."  });
+        $("#l3").dropdownchecklist({ emptyText: "Prosim vyberte si ..."  });
 
+    });
+</script>
 <h2>Požiadavky na cvičenia pre predmet: <?php echo $subject; ?></h2>
 <table style="border-bottom:0px" border="0">
     <tr style="background-color: white;">
@@ -30,6 +38,18 @@
     </div>
     <div class="row" style="margin-bottom: 10px;">
         <div>Požiadavka na softvér:</div>
+        <?php
+            echo '<select id="s1" multiple="multiple" name="requirement[software][]"';
+            foreach ($software as $soft) {
+                $selSoft = "";
+                for ($i = 0; $i < count($requirement["software"]); $i++) {
+                    if ($requirement["software"][$i]["id_software"] == $soft["id"])
+                        $selSoft = "selected=\"selected\"";
+                }
+                echo '<option value="' . $soft["id"] . '"' . $selSoft . '>' . $soft["name"] . '</option>';
+            }
+        echo'</select>';
+            ?>
         <div><textarea rows="3" readonly style="height:52px;" cols="70" name='requirement[komentare][sw]'><?php echo $requirement["komentare"]["sw"];?></textarea></div>
     </div>
 </div>
@@ -51,7 +71,7 @@ else {
 	}
 	
 	// vyrenderuje spodnu cast poziadaviek (pocet studentov, typ miestnosti a kapacitu miestnosti)
-	function grouphtml($id_requirement, $id_layout, $skupina, $reqSkupina, $rooms_nazvy, $types)
+	function grouphtml($id_requirement, $id_layout, $skupina, $reqSkupina, $rooms_nazvy, $types,$equipments)
 	{
 		if (empty($reqSkupina)) return;
 		$id = $id_requirement . $id_layout;
@@ -76,7 +96,7 @@ else {
 		
 		$html = '
 			<div id="h_group'.$id.'_'.$skupina.'" style="display: block;" class="h_group">Typ skupiny '.$skupina.':</div>
-			<div id="group'.$id.'_'.$skupina.'"  style="display: block; height: 60px;  margin-top: 5px;" class="color3 group">
+			<div id="group'.$id.'_'.$skupina.'"  style="display: block; height: 85px;  margin-top: 5px;" class="color3 group">
 				<div class="room_chooser color4" style="height: 50px;">
 					Vyhovujúce miestnosti:
 					<input style="width: 160px;" readonly="readonly" value="'.$sel_rooms.'" />
@@ -91,13 +111,29 @@ else {
 					<div class="left_side" style="width: 130px;">Typ miestnosti:</div>
 					<div class="right_side" style="width: 200px;"><input size="20" readonly="readonly" value="'.$type.'" /></div>
 				</div>
+                                 <div class="row" style="width: 400px;">
+						<div class="left_side" style="width: 130px;">Vybavenie:</div>
+						<div class="right_side" style="width: 200px;">
+                                                <select id="la" multiple="multiple" name="requirement[layouts][' . $id_layout . '][requirement][' . $id_requirement . '][equipments][]"';
+
+                                                 foreach ($equipments as $eq) {
+                                                     $selEq = "";
+                                                     for ($i = 0; $i < count($req["equipment"]); $i++) {
+                                                         if ($req["equipment"][$i]["id_equipment"]== $eq["id"])
+                                                              $selEq = "selected=\"selected\"";
+        }
+                                            $html .= '<option value="'.$eq["id"].'"' . $selEq . '>' . $eq["type"] . '</option>';
+                                        }
+                                               $html .= '  </select>
+                                                </div>
+					</div>
 			</div>
 		';
 		return $html;
 	}
 
 	// vyrenderuje stred poziadavky rozsah cvicenia, maximalny pocet cviceni sucasne a komentar
-	function reqhtml($id_requirement, $id_layout, $cvicenie, $req, $rooms_nazvy, $types)
+	function reqhtml($id_requirement, $id_layout, $cvicenie, $req, $rooms_nazvy, $types,$equipments)
 	{
 		if (empty($req)) return;
 		$id = $id_requirement . $id_layout;
@@ -106,8 +142,8 @@ else {
 		$pract_paralell = $req["pract_paralell"];
 		$comment = $req["comment"];
 		
-		$group1 = grouphtml($id_requirement, $id_layout, '1' ,$req['rooms']['1'], $rooms_nazvy, $types);
-		$group2 = grouphtml($id_requirement, $id_layout, '2' ,$req['rooms']['2'], $rooms_nazvy, $types);
+		$group1 = grouphtml($id_requirement, $id_layout, '1' ,$req['rooms']['1'], $rooms_nazvy, $types,$equipments);
+		$group2 = grouphtml($id_requirement, $id_layout, '2' ,$req['rooms']['2'], $rooms_nazvy, $types,$equipments);
 		
 		$html = '
 		<div id="heading'.$id.'" style="display: block;">Cvičenie: '.$cvicenie.'</div>
@@ -132,7 +168,7 @@ else {
 	}
 	// $number je cislo rozlozenia 0 1 2
 	// $name   je meno rozlozenia a b c
-	function generateLayoutHtml($number, $name, $req, $rooms_nazvy, $types)
+	function generateLayoutHtml($number, $name, $req, $rooms_nazvy, $types,$equipments)
 	{
 		echo "<div class='part $name color1' "; if ($number == 0) echo "style='display: block;'"; echo">";
 		echo "<div class='core_head color2'>
@@ -171,7 +207,7 @@ else {
 				</div>";
 
 		for ($i=1; $i<=3; $i++) {
-			echo reqhtml("$i", "$name", "$i", $req["requirement"][$i], $rooms_nazvy, $types);
+			echo reqhtml("$i", "$name", "$i", $req["requirement"][$i], $rooms_nazvy, $types,$equipments);
 		}
 		echo "</div>";
 	}
@@ -195,9 +231,9 @@ else {
     <div id='mainForm'>
 <?php
 fb($requirement, "requirement");
-generateLayoutHtml(0,"a", $requirement["layouts"]["a"], $rooms_nazvy, $types);
-generateLayoutHtml(1,"b", $requirement["layouts"]["b"], $rooms_nazvy, $types);
-generateLayoutHtml(2,"c", $requirement["layouts"]["c"], $rooms_nazvy, $types);
+generateLayoutHtml(0,"a", $requirement["layouts"]["a"], $rooms_nazvy, $types,$equipments);
+generateLayoutHtml(1,"b", $requirement["layouts"]["b"], $rooms_nazvy, $types,$equipments);
+generateLayoutHtml(2,"c", $requirement["layouts"]["c"], $rooms_nazvy, $types,$equipments);
 ?>
     </div>
 </form>

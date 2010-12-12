@@ -84,7 +84,7 @@ class TeacherRequirements extends Model
         $this->dbh->Query($sql);
         $res = $this->dbh->fetch_assoc();
         $this->typ_poziadavky = $res["id"];*/
-        $this->typ_poziadavky = 0;
+        $this->typ_poziadavky = 1;
 
         /*$sql = "SELECT 3";//id FROM skupina WHERE code='Lecturer'";
         $this->dbh->Query($sql);
@@ -136,7 +136,8 @@ class TeacherRequirements extends Model
             ));
 
             $id_event = $this->dbh->GetLastInsertID();
-
+            //$date = new DateTime();
+            //$tmstamp=$date->getTimestamp();
             $sql =
                 "INSERT INTO request(id_person, id_event, description)
                         VALUES ($1, $2, $3)";

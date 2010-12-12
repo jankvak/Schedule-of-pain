@@ -19,12 +19,17 @@ class Req_prednaskaController extends AppController {
 
         // doplnujuce informacie, co, kto a kedy
         $subjects = new Subjects();
+        $software = new Software();
+        $equipments = new Equipment();
         $rooms = new Rooms();
         //TODO nenatiahnut to do meta poziadavky rovno aj nazov predmetu ??
         $id_predmet = $res["meta_poziadavka"]["id_predmet"];
         $subject = $subjects->getSubject($id_predmet);
         $student_count = $subjects->getStudentCount($id_predmet);
         $student_count_info = $subjects->getStudentCountInfo($id_predmet);
+        $this->set('software', $software->getAll());
+        $this->set('equipments', $equipments->getAllTypes());
+
         $this->set("subject", $subject["nazov"]);
         $this->set('student_count', $student_count['count']);
         $this->set('student_count_info', $student_count_info);

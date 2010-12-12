@@ -121,8 +121,14 @@ class MetaRequests extends Model
      */
     public function getPreviousMetaID($id_predmet, $id_poziadavka_typ, $metaPoziadavkaID)
     {
-        $sql = "SELECT max(id) AS id FROM meta_poziadavka WHERE (id_predmet=$1 AND id_poziadavka_typ=$2 AND id<$3)";
-        $this->dbh->query($sql, array($id_predmet,$id_poziadavka_typ,$metaPoziadavkaID));
+         $query =
+            "SELECT max(request.id) AS id
+            FROM   request JOIN event ON request.id_event = event.id
+                            JOIN person ON request.id_person = person.id
+             WHERE  event.id_course = $1 AND event.event_type = $2
+";
+   //     $sql = "SELECT max(id) AS id FROM request WHERE (id_predmet=$1 AND id_poziadavka_typ=$2 AND id<$3)";
+        $this->dbh->query($query, array($id_predmet,$id_poziadavka_typ));
         $result = $this->dbh->fetchall_assoc();
 
         return $result[0]['id'];
@@ -137,8 +143,16 @@ class MetaRequests extends Model
      */
     public function getNextMetaID($id_predmet, $id_poziadavka_typ, $metaPoziadavkaID)
     {
-        $sql = "SELECT min(id) AS id FROM meta_poziadavka WHERE (id_predmet=$1 AND id_poziadavka_typ=$2 AND id>$3)";
-        $this->dbh->query($sql, array($id_predmet,$id_poziadavka_typ,$metaPoziadavkaID));
+       // $sql = "SELECT min(id) AS id FROM meta_poziadavka WHERE (id_predmet=$1 AND id_poziadavka_typ=$2 AND id>$3)";
+        //$this->dbh->query($sql, array($id_predmet,$id_poziadavka_typ,$metaPoziadavkaID));
+        $query =
+            "SELECT min(request.id) AS id
+            FROM   request JOIN event ON request.id_event = event.id
+                            JOIN person ON request.id_person = person.id
+             WHERE  event.id_course = $1 AND event.event_type = $2
+";
+   //     $sql = "SELECT max(id) AS id FROM request WHERE (id_predmet=$1 AND id_poziadavka_typ=$2 AND id<$3)";
+        $this->dbh->query($query, array($id_predmet,$id_poziadavka_typ));
         $result = $this->dbh->fetchall_assoc();
 
         return $result[0]['id'];
