@@ -25,6 +25,8 @@ class PractRequirements extends Model
     // referencia na model metapoziadavok
     private $metaRequests;
 
+    private $periods;
+
     // tak manulne to sem zadavat ako magor nebudem ...
     // konstruktor nageneruje poziadavky pre requirements dynamicky
     public $check = array(
@@ -38,6 +40,7 @@ class PractRequirements extends Model
     public function __construct() {
     //init DB connectu
         parent::__construct();
+        $this->periods = new Periods();
         // naplnenie requirements, treba zobrat referenciu aby neskopirovalo
         $ch = &$this->check["requirement"]["array"];
         for ($rozl=1;$rozl<=MAX_ROZLOZENI;$rozl++) {
@@ -129,9 +132,11 @@ class PractRequirements extends Model
         $sql =
             "SELECT event.id AS id_event, request.id AS id_request
                FROM request JOIN event ON request.id_event = event.id
-              WHERE event.id_course = $1";
+              WHERE event.id_course = $1
+                AND event.event_type = $2";
         $this->dbh->query($sql, array(
-            $this->course_id
+            $this->course_id,
+            $this->typ_poziadavky
         ));
         if ($this->dbh->RowCount()>0) {
             $result = $this->dbh->fetch_assoc();
