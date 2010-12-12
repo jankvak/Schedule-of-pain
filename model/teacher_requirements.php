@@ -84,7 +84,7 @@ class TeacherRequirements extends Model
         $this->dbh->Query($sql);
         $res = $this->dbh->fetch_assoc();
         $this->typ_poziadavky = $res["id"];*/
-        $this->typ_poziadavky = 0;
+        $this->typ_poziadavky = 1;
 
         /*$sql = "SELECT 3";//id FROM skupina WHERE code='Lecturer'";
         $this->dbh->Query($sql);

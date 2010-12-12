@@ -19,10 +19,14 @@ class Req_cvicenieController extends AppController {
 
         $subjects = new Subjects();
         $rooms = new Rooms();
+        $software = new Software();
+        $equipments = new Equipment();
         $id_predmet = $res["meta_poziadavka"]["id_predmet"];
         $subject = $subjects->getSubject($id_predmet);
         $student_count = $subjects->getStudentCount($id_predmet);
         $student_count_info = $subjects->getStudentCountInfo($id_predmet);
+                $this->set('software', $software->getAll());
+        $this->set('equipments', $equipments->getAllTypes());
         $this->set("subject", $subject["nazov"]);
         $this->set('student_count', $student_count['count']);
         $this->set('student_count_info', $student_count_info);

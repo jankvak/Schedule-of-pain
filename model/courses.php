@@ -143,10 +143,10 @@ public function getForUserCourse($userID, $semester) {
     public function getAll($semesterID)
     {
         $sql =
-            "SELECT course.*
-            FROM course JOIN course_semester c2s ON course.id = c2s.id_course
+            "SELECT c.id, c.name AS nazov, c.abbreviation AS skratka
+            FROM course c JOIN course_semester c2s ON c.id = c2s.id_course
             WHERE c2s.id_semester=$1
-	    ORDER BY course.name";
+	    ORDER BY c.name";
         $this->dbh->query($sql, array($semesterID));
 
         return $this->dbh->fetchall_assoc();

@@ -1,5 +1,13 @@
 <script type="text/javascript" src="js/switch_tab.js"></script>
+<script type="text/javascript">
+    $(document).ready(function() {
+        $("#s1").dropdownchecklist({ emptyText: "Prosim vyberte si ..."  });
+        $("#la").dropdownchecklist({ emptyText: "Prosim vyberte si ..."  });
+        $("#l2").dropdownchecklist({ emptyText: "Prosim vyberte si ..."  });
+        $("#l3").dropdownchecklist({ emptyText: "Prosim vyberte si ..."  });
 
+    });
+</script>
 <h2>Požiadavky na prednášky pre predmet: <?php echo $subject; ?></h2>
 <table style="border-bottom:0px" border="0">
     <tr style="background-color: white;">
@@ -29,6 +37,18 @@
     </div>
     <div class="row" style="margin-bottom: 10px;">
         <div>Požiadavka na softvér:</div>
+        <?php
+            echo '<select id="s1" multiple="multiple" name="requirement[software][]"';
+            foreach ($software as $soft) {
+                $selSoft = "";
+                for ($i = 0; $i < count($requirement["software"]); $i++) {
+                    if ($requirement["software"][$i]["id_software"] == $soft["id"])
+                        $selSoft = "selected=\"selected\"";
+                }
+                echo '<option value="' . $soft["id"] . '"' . $selSoft . '>' . $soft["name"] . '</option>';
+            }
+        echo'</select>';
+            ?>
         <div><textarea rows="3" readonly style="height:52px;" cols="70" name='requirement[komentare][sw]'><?php echo $requirement["komentare"]["sw"];?></textarea></div>
     </div>
 </div>
@@ -59,7 +79,7 @@ else
     	return $p ? "$attr='$attr'" : "";
 	}
 	
-	function reqhtml($id_requirement, $id_layout, $prednaska, $req, $rooms_nazvy) 
+	function reqhtml($id_requirement, $id_layout, $prednaska, $req, $rooms_nazvy, $equipments)
 	{
 		$id = $id_requirement . $id_layout;
 		// nekreslit nic ak nemame poziadavku
@@ -93,7 +113,7 @@ else
 					<div class="right_side"><input size="5" readonly="readonly" value="'.$lecture_hours.'" /> hodiny</div>
 				</div>
 					<div class="row">
-						<div class="inside_block color3" style="height: 60px;">
+						<div class="inside_block color3" style="height: 85px;">
 							<div class="room_chooser color4" style="height: 50px;">
 								Vyhovujúce miestnosti:
 								<input type="text" readonly="readonly" style="width: 160px;" value="'.$sel_rooms.'" />
@@ -107,9 +127,26 @@ else
 							<div class="row" style="width: 400px;">
 								<div class="left_side" style="width: 140px;">Kapacita miestnosti:</div>
 								<div class="right_side" style="width: 50px;"><input size="5" readonly="readonly" value="'.$rooms_capacity.'" /></div>
-								<div class="left_side" style="width: 80px;"><input id="chbNote" type="checkbox"  disabled="disabled" style="margin-left: 0px;" '.$notebook_checked.' />notebook</div>
-								<div class="right_side" style="width: 80px;"><input id="chbProj" type="checkbox" disabled="disabled" style="margin-left: 0px;" '.$projektor_checked.' />projektor</div>												
+                                                                    
+                                                        </div>
+                                                        <div class="row" style="width: 400px;">
+						<div class="left_side" style="width: 140px;">Vybavenie:</div>
+						<div class="right_side" style="width: 200px;">
+                                                <select id="la" multiple="multiple" name="requirement[layouts][' . $id_layout . '][requirement][' . $id_requirement . '][equipments][]"';
+
+                                                 foreach ($equipments as $eq) {
+                                                     $selEq = "";
+                                                     for ($i = 0; $i < count($req["equipment"]); $i++) {
+                                                         if ($req["equipment"][$i]["id_equipment"]== $eq["id"])
+                                                              $selEq = "selected=\"selected\"";
+        }
+                                            $html .= '<option value="'.$eq["id"].'"' . $selEq . '>' . $eq["type"] . '</option>';
+                                        }
+                                               $html .= '  </select>
+                                                </div>
+					</div>
 							</div>
+                                                         
 						</div>
 					</div>
 					<div class="row">
@@ -124,7 +161,7 @@ else
 		return $html;
 	}
 
-	function generateLayoutHtml($number, $name, $req, $rooms_nazvy)
+	function generateLayoutHtml($number, $name, $req, $rooms_nazvy,$equipments)
 	{
 		echo "<div class='part $name color1'"; if ($number == 0) echo " style='display: block;'"; echo">";
 		echo "<div class='core_head color2'>
@@ -161,7 +198,7 @@ else
 					</div>
 		         </div>";
 		for ($i=1; $i<=3; $i++) {
-			echo reqhtml("$i", "$name", "$i", $req["requirement"][$i], $rooms_nazvy);
+			echo reqhtml("$i", "$name", "$i", $req["requirement"][$i], $rooms_nazvy, $equipments);
 		}
 		echo "</div>";
 
@@ -186,9 +223,9 @@ else
 <div id='mainForm'>
 <?php
 fb($requirement,"requirement");
-generateLayoutHtml(0, "a", $requirement["layouts"]["a"], $rooms_nazvy);
-generateLayoutHtml(1, "b", $requirement["layouts"]["b"], $rooms_nazvy);
-generateLayoutHtml(2, "c", $requirement["layouts"]["c"], $rooms_nazvy);
+generateLayoutHtml(0, "a", $requirement["layouts"]["a"], $rooms_nazvy,$equipments);
+generateLayoutHtml(1, "b", $requirement["layouts"]["b"], $rooms_nazvy,$equipments);
+generateLayoutHtml(2, "c", $requirement["layouts"]["c"], $rooms_nazvy,$equipments);
 ?>
 </div>
 </form>
