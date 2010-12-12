@@ -48,12 +48,13 @@ class Subjects extends Model {
 
     // vrati vsetky predmety z aktivneho semestra
     function getSubjects() {
+        $periods = new Periods();
         $query =
 
             "SELECT course.id,
                     course.name AS name,
                     course.code AS code,
-                    c2s.id_semester AS semester,
+                    \"SemesterDescription\"(c2s.id_semester) AS semester,
                     c2sp.id_study_programme AS studijny_program,
                     course.termination_method AS sposob_ukoncenia,
                     false AS blokovat_preberanie,
