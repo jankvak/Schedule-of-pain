@@ -84,7 +84,7 @@ class TeacherRequirements extends Model
         $this->dbh->Query($sql);
         $res = $this->dbh->fetch_assoc();
         $this->typ_poziadavky = $res["id"];*/
-        $this->typ_poziadavky = 1;
+        $this->typ_poziadavky = 0;
 
         /*$sql = "SELECT 3";//id FROM skupina WHERE code='Lecturer'";
         $this->dbh->Query($sql);
@@ -112,9 +112,11 @@ class TeacherRequirements extends Model
         $sql =
             "SELECT event.id AS id_event, request.id AS id_request
                FROM request JOIN event ON request.id_event = event.id
-              WHERE event.id_course = $1";
+              WHERE event.id_course = $1
+                AND event.event_type = $2";
         $this->dbh->query($sql, array(
-            $this->course_id
+            $this->course_id,
+            $this->typ_poziadavky
         ));
         if ($this->dbh->RowCount()>0) {
             $result = $this->dbh->fetch_assoc();
