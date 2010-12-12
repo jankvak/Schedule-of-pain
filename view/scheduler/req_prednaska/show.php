@@ -89,7 +89,7 @@ else
         $lecture_hours = $req["lecture_hours"];
 		$notebook_checked = hasAttr($req["equipment"]["notebook"], "checked");
 		$projektor_checked = hasAttr($req["equipment"]["beamer"], "checked");
-        $chair_count = $req["equipment"]["chair_count"];        
+        $chair_count = $req["chair_count"]["equipment_count"];
 		$hned_po_checked = hasAttr($req["after_lecture"], "checked");
 		$skor_ako_checked = hasAttr($req["before_lecture"], "checked");
         $comment = $req["comment"];

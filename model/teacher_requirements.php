@@ -136,7 +136,8 @@ class TeacherRequirements extends Model
             ));
 
             $id_event = $this->dbh->GetLastInsertID();
-
+            //$date = new DateTime();
+            //$tmstamp=$date->getTimestamp();
             $sql =
                 "INSERT INTO request(id_person, id_event, description)
                         VALUES ($1, $2, $3)";

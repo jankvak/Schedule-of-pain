@@ -143,7 +143,7 @@ public function getForUserCourse($userID, $semester) {
     public function getAll($semesterID)
     {
         $sql =
-            "SELECT c.id, c.name AS nazov, c.abbreviation AS skratka
+            "SELECT c.id, c.name AS nazov, c.abbreviation AS skratka, c2s.id_semester AS semester
             FROM course c JOIN course_semester c2s ON c.id = c2s.id_course
             WHERE c2s.id_semester=$1
 	    ORDER BY c.name";
