@@ -299,7 +299,7 @@ if (!isset($requirement))
         echo'</select>';
             ?>
 
-        <textarea rows="3" style="height:52px;" cols="70" name='requirement[komentare][sw]'><?php echoParam($requirement["komentare"]["sw"]); ?></textarea><br />
+        
     </div>
 
     <div id="tabs">
