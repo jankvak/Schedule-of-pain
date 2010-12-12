@@ -10,8 +10,10 @@
 <script type="text/javascript">
     $(document).ready(function() {
         $("#s1").dropdownchecklist({ emptyText: "Prosim vyberte si ..."  });
-        $("#s2").dropdownchecklist({ emptyText: "Prosim vyberte si ..."  });
-        $("#s3").dropdownchecklist({ emptyText: "Prosim vyberte si ...", firstItemChecksAll: true });
+        $("#l1").dropdownchecklist({ emptyText: "Prosim vyberte si ..."  });
+        $("#l2").dropdownchecklist({ emptyText: "Prosim vyberte si ..."  });
+        $("#l3").dropdownchecklist({ emptyText: "Prosim vyberte si ..."  });
+
     });
 </script>
 <script type="text/javascript">
@@ -67,7 +69,7 @@ function hasAttr($p, $attr) {
     return $p ? "$attr='$attr'" : "";
 }
 
-function reqhtml($id_requirement, $id_layout, $capacities, $roomsByName, $prednaska, &$req, $student_count, $poziadavka_prebrata,$equips) {
+function reqhtml($id_requirement, $id_layout, $capacities, $roomsByName, $prednaska, &$req, $student_count, $poziadavka_prebrata,$equipments) {
     $id = $id_requirement . $id_layout;
     $display = ($prednaska == 1 || $req) ? "block" : "none";
     // len ak mame data nebude disabled
@@ -79,7 +81,7 @@ function reqhtml($id_requirement, $id_layout, $capacities, $roomsByName, $predna
         $after_lecture = hasAttr($req["after_lecture"], "checked");
         $before_lecture = hasAttr($req["before_lecture"], "checked");
         $comment = $req["comment"];
-        $chair_count = $req["equipment"]["chair_count"];
+        $chair_count = $req["chair_count"]["equipment_count"];
         $notebook = hasAttr($req["equipment"]["notebook"], "checked");
         $beamer = hasAttr($req["equipment"]["beamer"], "checked");
 
@@ -138,24 +140,28 @@ function reqhtml($id_requirement, $id_layout, $capacities, $roomsByName, $predna
         $sel = hasAttr($req["rooms"]["capacity"] == $capacity["kapacita"], "selected");
         $html .= '<option ' . $sel . '>' . $capacity["kapacita"] . '</option>';
     }
+    $la=$id_requirement;
     $html .= '</select>
                         </div>
 					</div>
+                                        
                                         <div class="row" style="width: 400px;">
 						<div class="left_side">Vybavenie:</div>
 						<div class="right_side" style="width: 100px;">
-                                                <select id="s2" multiple="multiple">';
-                                        foreach ($equips as $eq) {
-                                              if(in_array($req["equipment"],$eq))
-                                               $sel="selected";
-                                              else 
-                                                  $sel="";
-                                            $html .= '<option ' . $sel . '>' . $eq["type"] . '</option>';
+                                                <select id="l'.$la.'" multiple="multiple" name="requirement[layouts][' . $id_layout . '][requirement][' . $id_requirement . '][equipments][]"';
+                                                 
+                                                 foreach ($equipments as $eq) {
+                                                     $selEq = "";
+                                                     for ($i = 0; $i < count($req["equipment"]); $i++) {
+                                                         if ($req["equipment"][$i]["id_equipment"]== $eq["id"])
+                                                              $selEq = "selected=\"selected\"";
+        }
+                                            $html .= '<option value="'.$eq["id"].'"' . $selEq . '>' . $eq["type"] . '</option>';
                                         }
                                                $html .= '  </select>
                                                 </div>
 					</div>';
-
+                                       
     //select na konkretne miestnosti
     $html .= '  <div class="row" style="width: 400px;">
                     <div class="left_side room_select_header" id="room_select_header_' . $id . '" title="Klikni pre výber konkrétnej miestnosti"> Vybrať konkrétnu miestnosť</div>
@@ -187,7 +193,7 @@ function reqhtml($id_requirement, $id_layout, $capacities, $roomsByName, $predna
     return $html;
 }
 
-function generateLayoutHtml($number, $name, $capacities, $roomsByName, &$requirements, $student_count, $poziadavka_prebrata,$equips) {
+function generateLayoutHtml($number, $name, $capacities, $roomsByName, &$requirements, $student_count, $poziadavka_prebrata,$equipments) {
     $disabledLayout = hasAttr($number > 0 && !$requirements, "disabled");
     echo "<div class='part $name color1' ";
     if ($number == 0)
@@ -235,23 +241,7 @@ function generateLayoutHtml($number, $name, $capacities, $roomsByName, &$require
         $checked = hasAttr($requirements["weeks"][$i - 1], "checked");
         echo "<div class='cbox'><input id='$name$i' type='checkbox' name='requirement[layouts][$name][weeks][" . ($i - 1) . "]' {$disabledLayout} {$checked}/></div>";
     }
-    echo "'<div class='left_side'>";
-    echo "<select id=\"s3\" multiple=\"multiple\">
-                                                   <option>Všetky</option>
-                                                   <option>1</option>
-                                                   <option>2</option>
-                                                   <option>3</option>
-                                                   <option>4</option>
-                                                   <option>5</option>
-                                                   <option>6</option>
-                                                   <option>7</option>
-                                                   <option>8</option>
-                                                   <option>9</option>
-                                                   <option>10</option>
-                                                   <option>11</option>
-                                                   <option>12</option>
-                                                   <option>13</option>
-                                                </select></div>";
+
     echo
 
     "</div>
@@ -260,7 +250,7 @@ function generateLayoutHtml($number, $name, $capacities, $roomsByName, &$require
 					  </div>";
     for ($i = 1; $i <= 3; $i++) {
 
-        echo reqhtml("$i", "$name", $capacities, $roomsByName, "$i", $requirements["requirement"][$i], $student_count, $poziadavka_prebrata,$equips);
+        echo reqhtml("$i", "$name", $capacities, $roomsByName, "$i", $requirements["requirement"][$i], $student_count, $poziadavka_prebrata,$equipments);
     }
     echo "</div>";
 }
@@ -300,18 +290,19 @@ if (!isset($requirement))
     </div>
     <div class="row" style="margin-bottom: 10px;">
         Požiadavka na softvér:<br />
-        <select id="s1" multiple="multiple">
             <?php
-            foreach ($software as $soft){
-                if(in_array($req["software"],$soft))
-                  $sel="selected";
-                else
-                  $sel="";
-                echo '<option ' . $sel . '>' . $soft["name"] . '</option>';
-                
+            echo '<select id="s1" multiple="multiple" name="requirement[software][]"';
+            foreach ($software as $soft) {
+                $selSoft = "";
+                for ($i = 0; $i < count($requirement["software"]); $i++) {
+                    if ($requirement["software"][$i]["id_software"] == $soft["id"])
+                        $selSoft = "selected=\"selected\"";
+                }
+                echo '<option value="' . $soft["id"] . '"' . $selSoft . '>' . $soft["name"] . '</option>';
             }
+        echo'</select>';
             ?>
-        </select>
+
         <textarea rows="3" style="height:52px;" cols="70" name='requirement[komentare][sw]'><?php echoParam($requirement["komentare"]["sw"]); ?></textarea><br />
     </div>
 
@@ -338,9 +329,9 @@ if (!isset($requirement))
     <div id="mainForm">
         <?php
                 fb($requirement, "requirement");
-                generateLayoutHtml(0, "a", $capacities, $roomsByName, $requirement["layouts"]["a"], $student_count, $poziadavka_prebrata,$equips);
-                generateLayoutHtml(1, "b", $capacities, $roomsByName, $requirement["layouts"]["b"], $student_count, $poziadavka_prebrata,$equips);
-                generateLayoutHtml(2, "c", $capacities, $roomsByName, $requirement["layouts"]["c"], $student_count, $poziadavka_prebrata,$equips);
+                generateLayoutHtml(0, "a", $capacities, $roomsByName, $requirement["layouts"]["a"], $student_count, $poziadavka_prebrata,$equipments);
+                generateLayoutHtml(1, "b", $capacities, $roomsByName, $requirement["layouts"]["b"], $student_count, $poziadavka_prebrata,$equipments);
+                generateLayoutHtml(2, "c", $capacities, $roomsByName, $requirement["layouts"]["c"], $student_count, $poziadavka_prebrata,$equipments);
         ?>
             </div>
         </form>

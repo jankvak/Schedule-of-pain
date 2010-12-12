@@ -164,6 +164,8 @@ class TeacherRequirements extends Model
         //$this->__saveEquipment($requirement['equipment'], $requirement_id);
         $this->__saveRooms($this->requirement["layouts"]["a"]["requirement"][1]["rooms"], $metaPoziadavkaID);
         //$this->dbh->TransactionEnd();
+        $this->__saveEquipments($this->requirement["layouts"]["a"]["requirement"][1]["equipments"], $metaPoziadavkaID, $this->requirement["layouts"]["a"]["requirement"][1]["equipment"]);
+        $this->__saveSoftware($this->requirement["software"], $metaPoziadavkaID);
     }
 
     private function __saveLayout($layout, $id_person, $id_request) {
@@ -213,23 +215,50 @@ class TeacherRequirements extends Model
 
         $requirement_id = $this->dbh->GetLastInsertID();
     }
+    private function __saveEquipments($equipments, $requirement_id, $chairs_count) {
+        if($chairs_count>='0'){
+                $query =
+                    "INSERT INTO request_equipment(id_request, id_equipment, equipment_count)
+             VALUES($1, $2, $3)";
+                $this->dbh->query($query, array(
+                $requirement_id,'86',$chairs_count['chair_count']));
+            }
+        foreach ($equipments as $eq) {
+            
+            $query =
+                    "INSERT INTO request_equipment(id_request, id_equipment)
+             VALUES($1, $2)";
 
+            $this->dbh->query($query, array(
+                $requirement_id, $eq));
+        }
+    }
+    private function __saveSoftware($software, $requirement_id) {
+        foreach ($software as $soft) {
+            $query =
+                    "INSERT INTO request_software(id_request, id_software)
+             VALUES($1, $2)";
+
+            $this->dbh->query($query, array(
+                $requirement_id, $soft));
+        }
+    }
     // TODO: mozno dakedy daleko v buducnosti:
     // su tu natvrdo len tieto vybavenia ... co takto brat udaje z tabulky vybavenie ?
     // tym padom aj upravit pohlad aby tam daval vsetky + do DB by sa muselo kvoli stolickam dat
     // atribut ci countable, inac len true/false ci treba alebo nie
     private function __saveEquipment($equipment, $requirement_id) {
-        if($equipment['notebook']) {
-            $this->__insertEquipment($requirement_id, 1, 1);
-        }
-
-        if($equipment['beamer']) {
-            $this->__insertEquipment($requirement_id, 2, 1);
-        }
-
-        if($equipment['chair_count'] > 0) {
-            $this->__insertEquipment($requirement_id, 3, $equipment['chair_count']);
-        }
+//        if($equipment['notebook']) {
+//            $this->__insertEquipment($requirement_id, 1, 1);
+//        }
+//
+//        if($equipment['beamer']) {
+//            $this->__insertEquipment($requirement_id, 2, 1);
+//        }
+//
+//        if($equipment['chair_count'] > 0) {
+//            $this->__insertEquipment($requirement_id, 3, $equipment['chair_count']);
+//        }
 
     }
 
@@ -288,7 +317,7 @@ class TeacherRequirements extends Model
         // ziskanie komentarov
         $res["requirement"]["komentare"] = $res["meta_poziadavka"]["komentar"];//$this->__loadComments($metaPoziadavkaID);
         $res["requirement"]["layouts"] = $this->__loadLayouts($metaPoziadavkaID);
-
+        $res["requirement"]["software"]=$this->__loadSoftware($metaPoziadavkaID);
         return $res;
     }
 
@@ -397,12 +426,13 @@ class TeacherRequirements extends Model
     {
         return array(
             "lecture_hours"     => $req["rozsah_hodin"],
+            "chair_count"       => $this->__loadChairCount($req["id_poziadavka"]),
             "after_lecture"     => $req["cvic_hned_po_prednaske"],
             "before_lecture"    => $req["cvic_skor_ako_predn"],
             "comment"           => $req["ine"],
             "rooms"             => $this->__loadRooms($req["id_poziadavka"]),
             "equipment"         => $this->__loadEquipment($req["id_poziadavka"]),
-            "software"          => $this->__loadSoftware($reqID["id_poziadavka"])
+            //"software"          => $this->__loadSoftware($reqID["id_poziadavka"])
         );
     }
 
@@ -493,6 +523,14 @@ class TeacherRequirements extends Model
          $sql = "SELECT pv.* FROM request_equipment pv WHERE pv.id_request=$1";
         $this->dbh->query($sql, array($reqID));
         $vybavenie = $this->dbh->fetchall_assoc();
+        // default hodnoty ak nezadane, uviest vsetky ...
+        return $vybavenie;
+    }
+        private function __loadChairCount($reqID) {
+
+         $sql = "SELECT equipment_count FROM request_equipment WHERE id_request=$1 AND id_equipment='86' AND equipment_count>='0'";
+        $this->dbh->query($sql, array($reqID));
+        $vybavenie = $this->dbh->fetch_assoc();
         // default hodnoty ak nezadane, uviest vsetky ...
         return $vybavenie;
     }

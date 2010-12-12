@@ -130,16 +130,16 @@ class RequirementsController extends AppController {
      */
     private function __getCommonData($courseID) {
         $rooms = new Rooms();
-        $soft = new Software();
-        $equip = new Equipment();
+        $software = new Software();
+        $equipments = new Equipment();
         $subjects = new Subjects();
         $student_count = $subjects->getStudentCount($courseID);
         $student_count_info = $subjects->getStudentCountInfo($courseID);
         // od max kapacity
         $this->set('capacities', $rooms->getCapacities("DESC"));
-        $this->set('equips', $equip->getAllTypes());
+        $this->set('equipments', $equipments->getAllTypes());
         $this->set('rooms', $rooms->getAll());
-        $this->set('software', $soft->getAll());
+        $this->set('software', $software->getAll());
         // zoradene, len podla nazvu
         $this->set('roomsByName', $rooms->getAll(true));
         $this->set('subject', $subjects->getSubject($courseID));

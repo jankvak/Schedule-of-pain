@@ -57,7 +57,7 @@ class Equipment extends Model {
         return $this->dbh->fetch_assoc();
     }
     function getAllTypes() {
-        $query = "SELECT distinct type FROM equipment";
+        $query = "SELECT distinct type, id FROM equipment";
         $this->dbh->query($query);
         return $this->dbh->fetchall_assoc();
     }
