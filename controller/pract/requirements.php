@@ -128,11 +128,12 @@ class RequirementsController extends AppController {
      */
     private function __getCommonData($courseID) {
         $rooms = new Rooms();
-        $equip = new Equipment();
+        $software = new Software();
+        $equipments = new Equipment();
         $subjects = new Subjects();
         $student_count = $subjects->getStudentCount($courseID);
         $student_count_info = $subjects->getStudentCountInfo($courseID);
-        $this->set('equips', $equip->getAllTypes());
+        $this->set('equipments', $equipments->getAllTypes());
         $this->set('capacities', $rooms->getCapacities());
         $this->set('types', $rooms->getTypes());
         $this->set('type_capacity',$rooms->getCapacitiesForTypes());
@@ -142,6 +143,7 @@ class RequirementsController extends AppController {
         $this->set('subject', $subjects->getSubject($courseID));
         $this->set('student_count', $student_count['count']);
         $this->set('student_count_info', $student_count_info);
+                $this->set('software', $software->getAll());
         $this->set('course_id', $courseID);
         $this->set("semester_id", $this->session->read("semester"));
 		// flag blokovania a comment k tomu

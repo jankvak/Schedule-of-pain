@@ -82,7 +82,7 @@ class PractRequirements extends Model
     {
         $this->typ_poziadavky = 2; //cvicenie
 
-        $this->typ_role = 5; //cvicenie
+        $this->typ_role = 4; //cvicenie
     }
 
     //***************************************SAVE*****************************************************
@@ -90,42 +90,87 @@ class PractRequirements extends Model
     // uloz poziadavky
     public function save($id_person, $lock)
     {
-        $this->dbh->TransactionBegin();
-
-        if ($this->metaRequests->existsNewMetaRequest($this->course_id, $this->typ_poziadavky, $lock))
-        {
-        // je potrebne zrusit transakciu inac bude tabulka zablokovana stale
-            $this->dbh->TransactionRollback();
-            // vyhod exception aby user vedel ze sa stranka modifikovala
-            throw new RequestModified();
-        }
-
-        // najprv uloz metapoziadavku
+//        $this->dbh->TransactionBegin();
+//
+//        if ($this->metaRequests->existsNewMetaRequest($this->course_id, $this->typ_poziadavky, $lock))
+//        {
+//        // je potrebne zrusit transakciu inac bude tabulka zablokovana stale
+//            $this->dbh->TransactionRollback();
+//            // vyhod exception aby user vedel ze sa stranka modifikovala
+//            throw new RequestModified();
+//        }
+//
+//        // najprv uloz metapoziadavku
+//        $sql =
+//            "INSERT INTO meta_poziadavka (id_predmet, id_osoba, id_poziadavka_typ, cas_pridania)
+//        	 VALUES($1, $2, $3, now())";
+//
+//        $this->dbh->query($sql, array(
+//            $this->course_id, $id_person, $this->typ_poziadavky
+//        ));
+//        $metaPoziadavkaID = $this->dbh->GetLastInsertID();
+//
+//        // uloz komentare
+//        Comments::saveComment($metaPoziadavkaID, $this->requirement['komentare']['vseobecne'],1,$id_person);
+//        Comments::saveComment($metaPoziadavkaID, $this->requirement['komentare']['sw'],2,$id_person);
+//
+//        // update komentarov k diskusii, tak aby boli naviazane na najnovsiu poziadavku
+//        // update vykonat, len ak sme prave nepreberali poziadavku z minuleho roka  ( vtedy by bolo $this->poziadavka_prebrata == 1)
+//        if (!$this->poziadavka_prebrata) {
+//            Comments::updateComments($metaPoziadavkaID, $this->previousMetaID);
+//        }
+//
+//        // nasledne uloz rozlozenia
+//        foreach($this->requirement["layouts"] as $layout)
+//        {
+//            $this->__saveLayout($layout, $id_person, $metaPoziadavkaID);
+//        }
+//        $this->dbh->TransactionEnd();
         $sql =
-            "INSERT INTO meta_poziadavka (id_predmet, id_osoba, id_poziadavka_typ, cas_pridania)
-        	 VALUES($1, $2, $3, now())";
-
+            "SELECT event.id AS id_event, request.id AS id_request
+               FROM request JOIN event ON request.id_event = event.id
+              WHERE event.id_course = $1";
         $this->dbh->query($sql, array(
-            $this->course_id, $id_person, $this->typ_poziadavky
+            $this->course_id
         ));
-        $metaPoziadavkaID = $this->dbh->GetLastInsertID();
+        if ($this->dbh->RowCount()>0) {
+            $result = $this->dbh->fetch_assoc();
+            $id_event = $result["id_event"];
+            $metaPoziadavkaID = $result["id_request"];
+        } else {
+            $sql =
+                "INSERT INTO event(id_semester, id_course, event_type, confirmed)
+                        VALUES ($1,$2,$3,false)";
+            //    "INSERT INTO meta_poziadavka (id_predmet, id_osoba, id_poziadavka_typ, cas_pridania)
+            //	 VALUES($1, $2, $3, now())";
+            $this->dbh->query($sql, array(
 
-        // uloz komentare
-        Comments::saveComment($metaPoziadavkaID, $this->requirement['komentare']['vseobecne'],1,$id_person);
-        Comments::saveComment($metaPoziadavkaID, $this->requirement['komentare']['sw'],2,$id_person);
+                $this->periods->getLastSemesterID(),
+                $this->course_id,
+                $this->typ_poziadavky
+            ));
 
-        // update komentarov k diskusii, tak aby boli naviazane na najnovsiu poziadavku
-        // update vykonat, len ak sme prave nepreberali poziadavku z minuleho roka  ( vtedy by bolo $this->poziadavka_prebrata == 1)
-        if (!$this->poziadavka_prebrata) {
-            Comments::updateComments($metaPoziadavkaID, $this->previousMetaID);
+            $id_event = $this->dbh->GetLastInsertID();
+
+            $sql =
+                "INSERT INTO request(id_person, id_event, description)
+                        VALUES ($1, $2, $3)";
+            $this->dbh->query($sql, array(
+                $id_person, $id_event, $this->requirement['komentare']['vseobecne']
+            ));
+
+            $metaPoziadavkaID = $this->dbh->GetLastInsertID();
         }
-
-        // nasledne uloz rozlozenia
         foreach($this->requirement["layouts"] as $layout)
         {
             $this->__saveLayout($layout, $id_person, $metaPoziadavkaID);
         }
-        $this->dbh->TransactionEnd();
+        $this->__saveRequirement($this->requirement["layouts"]["a"]["requirement"][1], $id_event);
+        //$this->__saveEquipment($requirement['equipment'], $requirement_id);
+        $this->__saveRooms($this->requirement["layouts"]["a"]["requirement"][1]["rooms"], $metaPoziadavkaID);
+        //$this->dbh->TransactionEnd();
+        $this->__saveEquipments($this->requirement["layouts"]["a"]["requirement"][1]["equipments"], $metaPoziadavkaID, $this->requirement["layouts"]["a"]["requirement"][1]["equipment"]);
+        $this->__saveSoftware($this->requirement["software"], $metaPoziadavkaID);
     }
 
     /**
@@ -154,49 +199,118 @@ class PractRequirements extends Model
 
     private function __saveLayout($layout, $id_person, $metaPoziadavkaID)
     {
-        $query =
-            "INSERT INTO rozlozenie(id_meta_poziadavka, pocet_v_tyzdni, \"1\", \"2\", \"3\", \"4\", \"5\", \"6\", \"7\", \"8\", \"9\", \"10\", \"11\", \"12\", \"13\")
-             VALUES($1, $2";
-        $params = array($metaPoziadavkaID, $layout["pract_count"]);
-        // precykluj poziadavky inteligentne, ciarky davaj pred, tam bude treba vzdy aby
-        // sa nemusela kontrolovat na konci ci dat/nedat ciarku
-        for ($i=0; $i <= 12; $i++)
-        {
-            $query .= ", $".($i+3);
-            $params[] = isset($layout['weeks'][$i]);
-        }
-        $query .= ")";
+//        $query =
+//            "INSERT INTO rozlozenie(id_meta_poziadavka, pocet_v_tyzdni, \"1\", \"2\", \"3\", \"4\", \"5\", \"6\", \"7\", \"8\", \"9\", \"10\", \"11\", \"12\", \"13\")
+//             VALUES($1, $2";
+//        $params = array($metaPoziadavkaID, $layout["pract_count"]);
+//        // precykluj poziadavky inteligentne, ciarky davaj pred, tam bude treba vzdy aby
+//        // sa nemusela kontrolovat na konci ci dat/nedat ciarku
+//        for ($i=0; $i <= 12; $i++)
+//        {
+//            $query .= ", $".($i+3);
+//            $params[] = isset($layout['weeks'][$i]);
+//        }
+//        $query .= ")";
+//
+//        $this->dbh->query($query, $params);
+//        $id_layout = $this->dbh->GetLastInsertID();
+//
+//        foreach($layout['requirement'] as $requirement)
+//        {
+//            $this->__saveRequirement($requirement, $id_layout);
+//        }
+        for ($lecture=0;$lecture<=$layout["pract_count"];$lecture++) {
+            $query =
+                "INSERT INTO time_event(id)
+                        VALUES (DEFAULT)";
+            $this->dbh->query($query);
+            $id_time_event = $this->dbh->GetLastInsertID();
+            $query =
+                "INSERT INTO event_time_event(id_event, id_time_event)
+                        SELECT id_event, $2 FROM request WHERE id = $1";
+            $this->dbh->query($query, array(
+                $id_request, $id_time_event
+            ));
 
-        $this->dbh->query($query, $params);
-        $id_layout = $this->dbh->GetLastInsertID();
+            //tu zapisem do db tyzdne, v ktorych sa prednaska nekona
+            for ($i=0;$i<=12;$i++)
+            {
+                if (!isset($layout['weeks'][$i])) {
+                    $this->dbh->query(
+                        "INSERT INTO time_event_exclusion(id_time_event, \"order\")
+                                VALUES($1, $2)",
+                        array($id_time_event, $i)
+                    );
+                }
+            }
 
-        foreach($layout['requirement'] as $requirement)
-        {
-            $this->__saveRequirement($requirement, $id_layout);
         }
     }
 
     private function __saveRequirement($requirement, $id_layout)
     {
+//        $query =
+//            "INSERT INTO poziadavka(
+//			id_rozlozenie, rozsah_hodin, sucastne, cvic_hned_po_prednaske, cvic_skor_ako_predn, ine)
+//			VALUES($1, $2, $3, false, false, $4)";
+//
+//        $this->dbh->query($query, array(
+//            $id_layout, $requirement['pract_hours'], $requirement['pract_paralell'],
+//            $requirement['comment']
+//        ));
+//
+//        $requirement_id = $this->dbh->GetLastInsertID();
+//
+//        $this->__saveEquipment($requirement['equipment'], $requirement_id);
+//        $this->__saveRooms($requirement['rooms'], $requirement_id);
         $query =
-            "INSERT INTO poziadavka(
-			id_rozlozenie, rozsah_hodin, sucastne, cvic_hned_po_prednaske, cvic_skor_ako_predn, ine) 
-			VALUES($1, $2, $3, false, false, $4)";
+            "UPDATE course
+                SET lecture_hours = $2
+              WHERE EXISTS(SELECT 1 FROM event WHERE event.id_course = course.id AND event.id = $1)";
+            //"INSERT INTO poziadavka(id_rozlozenie, rozsah_hodin, sucastne,
+            // cvic_hned_po_prednaske, cvic_skor_ako_predn, ine)
+            // VALUES($1, $2, 0, $3, $4, $5)";
 
         $this->dbh->query($query, array(
-            $id_layout, $requirement['pract_hours'], $requirement['pract_paralell'],
-            $requirement['comment']
+            $id_event, $requirement['lecture_hours']
+            //$id_layout, $requirement['lecture_hours'], isset($requirement['after_lecture']),
+            //isset($requirement['before_lecture']), $requirement['comment']
         ));
 
         $requirement_id = $this->dbh->GetLastInsertID();
-
-        $this->__saveEquipment($requirement['equipment'], $requirement_id);
-        $this->__saveRooms($requirement['rooms'], $requirement_id);
     }
+   private function __saveEquipments($equipments, $requirement_id, $chairs_count) {
+        if($chairs_count>='0'){
+                $query =
+                    "INSERT INTO request_equipment(id_request, id_equipment, equipment_count)
+             VALUES($1, $2, $3)";
+                $this->dbh->query($query, array(
+                $requirement_id,'86',$chairs_count['chair_count']));
+            }
+        foreach ($equipments as $eq) {
 
+            $query =
+                    "INSERT INTO request_equipment(id_request, id_equipment)
+             VALUES($1, $2)";
+
+            $this->dbh->query($query, array(
+                $requirement_id, $eq));
+        }
+    }
+    private function __saveSoftware($software, $requirement_id) {
+        foreach ($software as $soft) {
+            $query =
+                    "INSERT INTO request_software(id_request, id_software)
+             VALUES($1, $2)";
+
+            $this->dbh->query($query, array(
+                $requirement_id, $soft));
+        }
+    }
     // TODO: mozno dakedy daleko v buducnosti:
     // su tu natvrdo len tieto vybavenia ... co takto brat udaje z tabulky vybavenie ?
     // tym padom aj upravit pohlad aby tam daval vsetky
+
     private function __saveEquipment($equipment, $requirement_id) {
         if($equipment['notebook']) {
             $this->__insertEquipment($requirement_id, 1, 1);
@@ -219,32 +333,52 @@ class PractRequirements extends Model
 
     private function __saveRooms($rooms, $requirement_id)
     {
-        $roomsIdx = 1;
-        foreach($rooms as $room) {
-            $query =
-                "INSERT INTO poziadavka_miestnost(id_poziadavka, pocet_studentov, zelana_kapacita, zelany_typ)
-                VALUES($1, $2, $3, $4)";
-            $this->dbh->query($query, array(
-                $requirement_id, $room['students_count'],
-                $room['capacity'], $room["type"]
-            ));
+//        $roomsIdx = 1;
+//        foreach($rooms as $room) {
+//            $query =
+//                "INSERT INTO poziadavka_miestnost(id_poziadavka, pocet_studentov, zelana_kapacita, zelany_typ)
+//                VALUES($1, $2, $3, $4)";
+//            $this->dbh->query($query, array(
+//                $requirement_id, $room['students_count'],
+//                $room['capacity'], $room["type"]
+//            ));
+//
+//            $rooms_id = $this->dbh->GetLastInsertID();
+//
+//            foreach($room['selected'] as $room) {
+//                $this->__saveRoom($room, $rooms_id, $roomsIdx);
+//            }
+//
+//            $roomsIdx++;
+//        }
+        $query =
+            "UPDATE course
+                SET student_count = $2
+              WHERE EXISTS(
+                        SELECT 1
+                          FROM event JOIN request ON request.id_event = event.id
+                         WHERE event.id_course = course.id
+                           AND request.id = $1)";
+        $this->dbh->query($query, array(
+            $requirement_id, $rooms['students_count']
+        ));
 
-            $rooms_id = $this->dbh->GetLastInsertID();
 
-            foreach($room['selected'] as $room) {
-                $this->__saveRoom($room, $rooms_id, $roomsIdx);
-            }
-
-            $roomsIdx++;
+        foreach($rooms['selected'] as $room) {
+            $this->__saveRoom($room, $requirement_id, $rooms);
         }
     }
 
     private function __saveRoom($room, $rooms_id, $roomsIdx)
     {
-        $query =
-            "INSERT INTO poziadavka_miestnost_miestnosti(id_poziadavka_miestnost, id_miestnost, sucastne_index)
-             VALUES($1, $2, $3)";
-        $this->dbh->query($query, array($rooms_id, $room, $roomsIdx));
+//        $query =
+//            "INSERT INTO poziadavka_miestnost_miestnosti(id_poziadavka_miestnost, id_miestnost, sucastne_index)
+//             VALUES($1, $2, $3)";
+//        $this->dbh->query($query, array($rooms_id, $room, $roomsIdx));
+                $query =
+            "INSERT INTO request_room(id_request,requested_capacity, requested_type, id_room)
+                    VALUES($1, $2,'1',$3)";
+        $this->dbh->query($query, array($requirement_id,$rooms['capacity'], $room));
     }
 
     //*************************************LOAD*******************************************************
@@ -261,11 +395,15 @@ class PractRequirements extends Model
     public function load($metaPoziadavkaID)
     {
         // ziskanie metapoziadavky
+//        $res["meta_poziadavka"] = $this->metaRequests->loadMetaRequest($metaPoziadavkaID);
+//        // ziskanie komentarov
+//        $res["requirement"]["komentare"] = $this->__loadComments($metaPoziadavkaID);
+//        $res["requirement"]["layouts"] = $this->__loadLayouts($metaPoziadavkaID);
         $res["meta_poziadavka"] = $this->metaRequests->loadMetaRequest($metaPoziadavkaID);
         // ziskanie komentarov
-        $res["requirement"]["komentare"] = $this->__loadComments($metaPoziadavkaID);
+        $res["requirement"]["komentare"] = $res["meta_poziadavka"]["komentar"];//$this->__loadComments($metaPoziadavkaID);
         $res["requirement"]["layouts"] = $this->__loadLayouts($metaPoziadavkaID);
-
+        $res["requirement"]["software"]=$this->__loadSoftware($metaPoziadavkaID);
         return $res;
     }
 
@@ -276,7 +414,40 @@ class PractRequirements extends Model
 
     private function __loadLayouts($metaPoziadavkaID)
     {
-        $sql = "SELECT * FROM rozlozenie WHERE id_meta_poziadavka=$1";
+//        $sql = "SELECT * FROM rozlozenie WHERE id_meta_poziadavka=$1";
+//        $this->dbh->query($sql, array($metaPoziadavkaID));
+//        $layouts = $this->dbh->fetchall_assoc();
+//
+//        $res = array();
+//        $layoutIndex = "a";
+//        foreach ($layouts as &$layout)
+//        {
+//            $tayoutOut = array();
+//            $layoutOut["pract_count"] = $layout["pocet_v_tyzdni"];
+//            $layoutOut["weeks"] = $this->__loadWeeks($layout);
+//            $layoutOut["requirement"] = $this->__loadRequirements($layout["id"]);
+//
+//            $res[$layoutIndex] = $layoutOut;
+//            $layoutIndex = chr(ord($layoutIndex)+1);
+//        }
+//        return $res;
+               $sql = "SELECT request.id,
+                       NOT \"IsNthEventExcluded\"(event.id, 0) AS \"1\",
+                       NOT \"IsNthEventExcluded\"(event.id, 1) AS \"2\",
+                       NOT \"IsNthEventExcluded\"(event.id, 2) AS \"3\",
+                       NOT \"IsNthEventExcluded\"(event.id, 3) AS \"4\",
+                       NOT \"IsNthEventExcluded\"(event.id, 4) AS \"5\",
+                       NOT \"IsNthEventExcluded\"(event.id, 5) AS \"6\",
+                       NOT \"IsNthEventExcluded\"(event.id, 6) AS \"7\",
+                       NOT \"IsNthEventExcluded\"(event.id, 7) AS \"8\",
+                       NOT \"IsNthEventExcluded\"(event.id, 8) AS \"9\",
+                       NOT \"IsNthEventExcluded\"(event.id, 9) AS \"10\",
+                       NOT \"IsNthEventExcluded\"(event.id, 10) AS \"11\",
+                       NOT \"IsNthEventExcluded\"(event.id, 11) AS \"12\",
+                       NOT \"IsNthEventExcluded\"(event.id, 12) AS \"13\"
+                  FROM request JOIN event ON request.id_event = event.id
+                               JOIN course ON event.id_course = course.id
+                 WHERE request.id=$1";
         $this->dbh->query($sql, array($metaPoziadavkaID));
         $layouts = $this->dbh->fetchall_assoc();
 
@@ -285,21 +456,39 @@ class PractRequirements extends Model
         foreach ($layouts as &$layout)
         {
             $tayoutOut = array();
-            $layoutOut["pract_count"] = $layout["pocet_v_tyzdni"];
             $layoutOut["weeks"] = $this->__loadWeeks($layout);
+            $layoutOut["pract_count"] = $layout["pocet_v_tyzdni"];
             $layoutOut["requirement"] = $this->__loadRequirements($layout["id"]);
 
             $res[$layoutIndex] = $layoutOut;
             $layoutIndex = chr(ord($layoutIndex)+1);
         }
         return $res;
+
     }
 
     private function __loadRequirements($rozlozenieID)
     {
+//        $sql =
+//            "SELECT p.* FROM poziadavka p
+//             WHERE id_rozlozenie=$1";
+//        $this->dbh->query($sql, array($rozlozenieID));
+//        $requirements = $this->dbh->fetchall_assoc();
+//
+//        $res = array();
+//        $requirementIndex = 1;
+//        foreach($requirements as $requirement)
+//        {
+//            $res[$requirementIndex++] = $this->__loadRequirement($requirement);
+//        }
+//        return $res;
         $sql =
-            "SELECT p.* FROM poziadavka p
-             WHERE id_rozlozenie=$1";
+            "SELECT course.lecture_hours AS rozsah_hodin,
+                    r.id AS id_poziadavka
+               FROM request r
+                        JOIN event ON r.id_event = event.id
+                        JOIN course ON event.id_course = course.id
+              WHERE r.id=$1";
         $this->dbh->query($sql, array($rozlozenieID));
         $requirements = $this->dbh->fetchall_assoc();
 
@@ -346,16 +535,62 @@ class PractRequirements extends Model
      */
     private function __loadRooms($reqID)
     {
-        $sql = "SELECT * FROM poziadavka_miestnost WHERE id_poziadavka=$1";
-        $this->dbh->query($sql, $reqID);
-        // cvicenia, mozu byt dva zaznamy
+//        $sql = "SELECT * FROM poziadavka_miestnost WHERE id_poziadavka=$1";
+//        $this->dbh->query($sql, $reqID);
+//        // cvicenia, mozu byt dva zaznamy
+//        $rooms = $this->dbh->fetchall_assoc();
+//        // prvy typ cvicenia
+//        $res1 = array(
+//            "students_count"    => $rooms[0]["pocet_studentov"],
+//            "capacity"          => $rooms[0]["zelana_kapacita"],
+//            "type"              => $rooms[0]["zelany_typ"],
+//            "selected"          => $this->__loadSelectedRooms($rooms[0]["id_poziadavka_miestnost"])
+//        );
+//        // druhy typ cvicenia iba ak je definovay
+//        if (isset($rooms[1])) {
+//            $res2 = array(
+//                "students_count"    => $rooms[1]["pocet_studentov"],
+//                "capacity"          => $rooms[1]["zelana_kapacita"],
+//                "type"              => $rooms[1]["zelany_typ"],
+//                // ak nenacita ziadne miestnosti, bude prazdne selected... asi to vadit nebude
+//                "selected"          => $this->__loadSelectedRooms($rooms[1]["id_poziadavka_miestnost"])
+//            );
+//        }
+//
+//        if (isset($rooms[1])) {
+//            $res = array(
+//                "1"	=> $res1,
+//                "2"	=> $res2
+//            );
+//        }
+//        else {
+//            $res = array(
+//                "1"	=> $res1
+//            );
+//        }
+//        return $res;
+        $sql = "SELECT request_room.id AS id_poziadavka_miestnost,
+                          request.id AS id_poziadavka,
+                          request_room.requested_type AS zelany_typ,
+                          course.student_count AS pocet_studentov,
+                          request_room.requested_capacity AS zelana_kapacita,
+                          request_room.id_room
+                     FROM request_room
+                              RIGHT OUTER JOIN request ON request_room.id_request = request.id
+                              JOIN event ON request.id_event = event.id
+                              JOIN course ON event.id_course = course.id
+                    WHERE request.id=$1";
+        $this->dbh->query($sql, array($reqID));
+        // prednasky => predpokladam iba jeden zaznam
         $rooms = $this->dbh->fetchall_assoc();
-        // prvy typ cvicenia
+        foreach ($rooms as $selectedRoom) {
+            $roomSel[] = $selectedRoom["id_room"];
+        }
         $res1 = array(
             "students_count"    => $rooms[0]["pocet_studentov"],
             "capacity"          => $rooms[0]["zelana_kapacita"],
             "type"              => $rooms[0]["zelany_typ"],
-            "selected"          => $this->__loadSelectedRooms($rooms[0]["id_poziadavka_miestnost"])
+            "selected"          => $roomSel
         );
         // druhy typ cvicenia iba ak je definovay
         if (isset($rooms[1])) {
@@ -364,7 +599,7 @@ class PractRequirements extends Model
                 "capacity"          => $rooms[1]["zelana_kapacita"],
                 "type"              => $rooms[1]["zelany_typ"],
                 // ak nenacita ziadne miestnosti, bude prazdne selected... asi to vadit nebude
-                "selected"          => $this->__loadSelectedRooms($rooms[1]["id_poziadavka_miestnost"])
+                "selected"          => $roomSel
             );
         }
 
@@ -407,21 +642,32 @@ class PractRequirements extends Model
      */
     private function __loadEquipment($reqID) {
     // mohol by spravit aj join ale nakolko vklada podla IDcok to iste spravi aj tu
-        $sql = "SELECT pv.* FROM poziadavka_vybavenie pv WHERE pv.id_poziadavka=$1";
+//        $sql = "SELECT pv.* FROM poziadavka_vybavenie pv WHERE pv.id_poziadavka=$1";
+//        $this->dbh->query($sql, array($reqID));
+//        $vybavenie = $this->dbh->fetchall_assoc();
+//
+//        $res = array(
+//            "notebook"  => false,
+//            "beamer"    => false
+//        );
+//        foreach ($vybavenie as $vyb) {
+//            if ($vyb["id_vybavenie"] == 1) $res["notebook"] = true;
+//            elseif ($vyb["id_vybavenie"] == 2) $res["beamer"] = true;
+//        }
+//        return $res;
+                 $sql = "SELECT pv.* FROM request_equipment pv WHERE pv.id_request=$1";
         $this->dbh->query($sql, array($reqID));
         $vybavenie = $this->dbh->fetchall_assoc();
-
-        $res = array(
-            "notebook"  => false,
-            "beamer"    => false
-        );
-        foreach ($vybavenie as $vyb) {
-            if ($vyb["id_vybavenie"] == 1) $res["notebook"] = true;
-            elseif ($vyb["id_vybavenie"] == 2) $res["beamer"] = true;
-        }
-        return $res;
+        // default hodnoty ak nezadane, uviest vsetky ...
+        return $vybavenie;
     }
-
+    private function __loadSoftware($reqID) {
+         $sql = "SELECT * FROM request_software WHERE id_request=$1";
+        $this->dbh->query($sql, array($reqID));
+        $software = $this->dbh->fetchall_assoc();
+        // default hodnoty ak nezadane, uviest vsetky ...
+        return $software;
+    }
     //*********************************OTHER**********************************************************
 
     // typ_poziadavky-roli
