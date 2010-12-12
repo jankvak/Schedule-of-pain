@@ -123,12 +123,8 @@ function reqhtml($id_requirement, $id_layout, $capacities, $roomsByName, $predna
 					</div>
 
 					<div class="row" style="width: 400px;">
-						<div class="left_side">Vybavenie miestnosti:</div>
-						<div class="right_side" style="width: 100px;"><input type="checkbox" style="margin-left: 0px;" name="requirement[layouts][' . $id_layout . '][requirement][' . $id_requirement . '][equipment][notebook]" ' . $disabledReq . ' ' . $notebook . '/> notebook</div>
-					</div>
-					<div class="row" style="width: 400px;">
-						<div class="left_side">Stoličky navyše: <input size="5" value="' . $chair_count . '" name="requirement[layouts][' . $id_layout . '][requirement][' . $id_requirement . '][equipment][chair_count]" ' . $disabledReq . '/></div>
-						<div class="right_side" style="width: 100px;"><input type="checkbox" style="margin-left: 0px;" name="requirement[layouts][' . $id_layout . '][requirement][' . $id_requirement . '][equipment][beamer]" ' . $disabledReq . ' ' . $beamer . '/> projektor</div>
+						<div class="left_side" >Stoličky navyše: </div>
+                                                <div class="right_side" style="width: 100px;"><input size="5" value="' . $chair_count . '" name="requirement[layouts][' . $id_layout . '][requirement][' . $id_requirement . '][equipment][chair_count]" ' . $disabledReq . '/></div>
 					</div>
                                         
                                        

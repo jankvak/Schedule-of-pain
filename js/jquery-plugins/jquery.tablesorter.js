@@ -724,7 +724,7 @@
 	ts.addParser({
 		id: "currency",
 		is: function(s) {
-			return /^[£$€?.]/.test(s);
+			return /^[L$�?.]/.test(s);
 		},
 		format: function(s) {
 			return $.tablesorter.formatFloat(s.replace(new RegExp(/[^0-9.]/g),""));
