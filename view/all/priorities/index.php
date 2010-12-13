@@ -7,6 +7,7 @@
 <?php $raster=array(array(),array(),array(),array(),array());
 $defColor;
 $colors=array("","","","","","","","","","");
+/*
 foreach( $types as $type)
 {    
     if($type['default']=='t')
@@ -14,7 +15,8 @@ foreach( $types as $type)
         $defColor=$type['color'];
     }
     $colors[$type['id']]=$type['color'];
-}
+} */
+
 for($i=0;$i<5;$i++)
     for($j=1;$j<=15;$j++)
         $raster[$i][$j]=$defColor;
