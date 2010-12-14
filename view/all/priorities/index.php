@@ -7,6 +7,7 @@
 <?php $raster=array(array(),array(),array(),array(),array());
 $defColor;
 $colors=array("","","","","","","","","","");
+/*
 foreach( $types as $type)
 {    
     if($type['default']=='t')
@@ -14,7 +15,8 @@ foreach( $types as $type)
         $defColor=$type['color'];
     }
     $colors[$type['id']]=$type['color'];
-}
+} */
+
 for($i=0;$i<5;$i++)
     for($j=1;$j<=15;$j++)
         $raster[$i][$j]=$defColor;
@@ -149,12 +151,7 @@ echo '<p><a href="all/priorities/getPrevPriorities">Prebrať osobné časové pr
 		</div>
 		
 		<div id="chooser">
-			<div>
-				<div class="col color5 priorityTableNote" style="width: 212px;">Výber priority:</div>
-				<div id="sel_a" class="col color_a sel" style="width: 150px;">Preferované</div>
-				<div id="sel_b" class="col color_b" style="width: 150px;">OK</div>
-				<div id="sel_c" class="col color_c" style="width: 150px;">Nevyhovujúce</div>
-			</div>
+			
 			<div  class="color5 commentNote" style="position: absolute; width:670px; height:100px;  margin-top:33px;" >
 			
 			<button class="prevb" > <img src="images/prev.png" ></img></button>

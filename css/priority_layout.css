@@ -104,3 +104,10 @@ line-height: 200%;
 	background-color:transparent; 
 }
 
+
+.editable
+{
+	background-color:#E6E6FA;
+}
+
+.ui-selecting { background-color: gray; }

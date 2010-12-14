@@ -30,7 +30,6 @@
 
 	<script type="text/javascript" src="js/jquery.js"></script>
 	<script type="text/javascript" src="js/jquery-plugins/jquery.ui.custom.min.js"></script>
-
 	<script type="text/javascript" src="js/jquery-plugins/autocomplete.js"></script>
 	<script type="text/javascript" src="js/delete-guardian.js"></script>
 	<script type="text/javascript" src="js/jquery-plugins/jquery.tablesorter.js"></script>
@@ -42,8 +41,6 @@
 	<script type="text/javascript" src="js/jquery-plugins/jquery.scrollTo.js"></script>
 	<script type="text/javascript" src="js/jquery-plugins/jquery.scrollTo-min.js"></script>
 	<script type="text/javascript" src="js/tables.js"></script>
-        <script type="text/javascript" src="js/jquery-plugins/jquery-1.4.2.min.js"></script>
-        <script type="text/javascript" src="js/jquery-plugins/jquery-ui-1.8.4.custom.min.js"></script>
         <script type="text/javascript" src="js/jquery-plugins/ui.dropdownchecklist-1.1-min.js"></script>
   <!--fullcalendar-->
   <script type='text/javascript' src='js/jquery-plugins/fullcalendar.js'></script>
@@ -54,11 +51,6 @@
 			$("input:first").focus();
 		});
 	</script>    
-
-
-        
-    
-
 </head>
 <body>
 

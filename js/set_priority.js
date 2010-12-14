@@ -10,18 +10,56 @@
 	//		riadok nadobuda hodnoty {1,2,3,4,5}
 	//		stlpec nadobuda hodnoty {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15}
 	
-	$(document).ready(function() {	
+	$(document).ready(function() {		
+	
 	//inicializácia prvku carousel - posuvný kontajner pre predmety
 	$("#carousel").jCarouselLite({
 		btnNext: ".nextb",
 		btnPrev: ".prevb",
 		visible: 5,
-		circular:true
+		circular:true,
+		scroll: 2
 	});
+	
+	$( ".table" ).selectable({ 
+		delay: 20,
+		filter: ".editable",
+		stop: function(event, ui)
+		{ 
+			//$(this).css("background-color","orange");
+			//ui.helper.css("background-color","orange");
+		//	$(this).find("div .ui-selected").html("pok");
+			$(this).find("div .ui-selected").each(function(ind)
+			{
+				if($(this).hasClass("closed"))return;
+				if( (!$(this).hasClass("1sel"))&&(!$(this).hasClass("2sel")) )
+				{
+				
+				$(this).css("background-color","green");
+				$(this).addClass("1sel");
+				}
+				else if($(this).hasClass("1sel"))
+				{
+				$(this).css("background-color","red");
+				$(this).removeClass("1sel");
+				$(this).addClass("2sel");
+				}
+				else if($(this).hasClass("2sel"))
+				{
+				$(this).css("background-color","#E6E6FA");
+				$(this).removeClass("2sel");
+				}
+			});
+
+
+
+		}
+		
+	});
+
 	
 	//inicializácia predmetu ako presunute¾ného prvku
 	$( ".predmet" ).draggable({  
-		tolerance:"pointer" ,
 		appendTo: "body",
 		helper: "clone",
 		revert: "true",
@@ -30,68 +68,55 @@
 		
 		start : function() {
         this.style.display="none";
-
         },
+		
 		stop : function() {
         this.style.display="";
+		
         },
-
-
 		});
-	//inicializácia kolonky v rozvrhu na akceptovanie predmetu
+	
+	
+//inicializácia kolonky v rozvrhu na akceptovanie predmetu
 	$(".editable").droppable({
+		tolerance:"pointer" ,
+
       drop: function(ev, ui) { 
-		$(this).html(ui.draggable.attr("id"));	
+		$(this).html(ui.draggable.attr("id") );
+		
+		$(this).css("background-color",ui.draggable.css("background-color"));
+		$(this).addClass("closed");
+		//alert( ui.draggable.find("div").html() );
+		
 		ui.helper.remove();
 		ui.revert("false");
-	
 		
 	  }
     });
 	
-	
-		$('#sel_a').click(function(){
-			if ($('#sel_a').hasClass("sel")) ;
-			else {
-				$('#sel_a').addClass("sel");
-				$('#sel_b').removeClass("sel");
-				$('#sel_c').removeClass("sel");
+		
+		$(".editable").click(function(){
+			//$(this)
+			if($(this).hasClass("closed"))return;
+			if( (!$(this).hasClass("1sel"))&&(!$(this).hasClass("2sel")) )
+			{
+				
+				$(this).css("background-color","green");
+				$(this).addClass("1sel");
 			}
-		});
-		$('#sel_b').click(function(){
-			if ($('#sel_b').hasClass("sel")) ;
-			else {
-				$('#sel_b').addClass("sel");
-				$('#sel_a').removeClass("sel");
-				$('#sel_c').removeClass("sel");
+			else if($(this).hasClass("1sel"))
+			{
+				$(this).css("background-color","red");
+				$(this).removeClass("1sel");
+				$(this).addClass("2sel");
 			}
-		});
-		$('#sel_c').click(function(){
-			if ($('#sel_c').hasClass("sel")) ;
-			else {
-				$('#sel_c').addClass("sel");
-				$('#sel_b').removeClass("sel");
-				$('#sel_a').removeClass("sel");
+			else if($(this).hasClass("2sel"))
+			{
+				$(this).css("background-color","#E6E6FA");
+				$(this).removeClass("2sel");
 			}
-		});
-
-		$('.editable').click(function(){
-			if ($('#sel_a').hasClass("sel")){
-				$(this).attr('class',"col editable color_a");
-				if ($("input[name='"+this.id+"']").length > 0) {
-				    $("input[name='"+this.id+"']").attr('value','1');
-				}	else {
-				    $("form").append('<input name="'+this.id+'" value="1" type="hidden"/>');
-				}
-			}
-			if ($('#sel_b').hasClass("sel")){
-				$(this).attr('class',"col editable color_b");
-				if ($("input[name='"+this.id+"']").length > 0) $("input[name='"+this.id+"']").remove();
-			}
-			if ($('#sel_c').hasClass("sel")){
-				$(this).attr('class',"col editable color_c");
-				if ($("input[name='"+this.id+"']").length > 0) $("input[name='"+this.id+"']").attr('value','2');
-				else $("form").append('<input name="'+this.id+'" value="2" type="hidden"/>');
-			}
+			//$(this).addClass("1sel");
+					
+			
 		});
 	})
