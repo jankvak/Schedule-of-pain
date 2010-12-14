@@ -91,10 +91,10 @@ class Courses extends Model {
                         FROM   course_semester c2s
                         WHERE  c2s.id_course = course.id
                            AND c2s.id_semester=$2)
-                AND p2c.id_group < 8
+                AND p2c.id_group = $3
              ORDER BY course.name";
         //vp.id_pedagog_typ=$1 AND
-        $this->dbh->query($query, array($userID, $semester));
+        $this->dbh->query($query, array($userID, $semester, $role));
         $predmety = $this->dbh->fetchall_assoc();
         $this->dbh->Release();
         $resultPredmety = array();
