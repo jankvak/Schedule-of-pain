@@ -41,8 +41,8 @@ class Lessons extends Model {
                 FROM person p
                 WHERE EXISTS(
                         SELECT 1
-                        FROM   person_course pc JOIN groups g on pc.id_group=g.id
-                        WHERE  code = 'Garant' AND pc.id_person = p.id)
+                        FROM   person_group p2g
+                        WHERE  p2g.id_group = 2 AND p2g.id_person = p.id)
                 ORDER BY p.last_name";
         $this->dbh->query($query);
         return $this->dbh->fetchall_assoc();
